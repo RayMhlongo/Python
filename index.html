@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Python Practice IDE</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+  <title>Ray's PyRace Python IDE</title>
 
   <link
     rel="stylesheet"
@@ -17,24 +20,995 @@
   <style>
     * {
       box-sizing: border-box;
+    }
+
+    html, body {
       margin: 0;
       padding: 0;
+      background: #060b14;
+      color: #e5eefc;
+      font-family: Arial, sans-serif;
+      min-height: 100%;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      font-family: Arial, sans-serif;
-      background: #0b0f17;
-      color: #e6edf3;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
     header {
-      padding: 16px;
+      padding: 18px 14px;
+      background: linear-gradient(180deg, #0d1526 0%, #0a1220 100%);
+      border-bottom: 1px solid #1d2940;
       text-align: center;
-      background: #111827;
-      border-bottom: 1px solid #1f2937;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .brand-badge {
+      background: #111d33;
+      border: 1px solid #29416c;
+      color: #7cb5ff;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #ffffff;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      color: #9eb2d4;
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      background: #0d1524;
+      border: 1px solid #1d2940;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+    }
+
+    .card-title {
+      padding: 12px 14px;
+      background: #0b1220;
+      border-bottom: 1px solid #1d2940;
+      font-weight: 700;
+      color: #dce8ff;
+      font-size: 0.96rem;
+    }
+
+    .section-body {
+      padding: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .toolbar,
+    .challenge-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button,
+    select {
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      min-height: 46px;
+      padding: 11px 14px;
+      outline: none;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 700;
+      user-select: none;
+      touch-action: manipulation;
+      transition: transform 0.08s ease, opacity 0.15s ease;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    select {
+      background: #121d31;
+      color: #e5eefc;
+      border: 1px solid #2a3b5d;
+      width: 100%;
+    }
+
+    .btn-run { background: #22c55e; color: #051009; }
+    .btn-clear-output { background: #334155; color: white; }
+    .btn-clear-code { background: #7c2d12; color: white; }
+    .btn-reset { background: #2563eb; color: white; }
+    .btn-save { background: #7c3aed; color: white; }
+    .btn-load { background: #0ea5e9; color: #04111a; }
+    .btn-challenge { background: #f59e0b; color: #1a1202; }
+    .btn-hint { background: #14b8a6; color: #031210; }
+    .btn-solution { background: #64748b; color: white; }
+    .btn-use { background: #ec4899; color: white; }
+
+    .status {
+      padding: 12px 14px 0;
+      color: #8eb5ff;
+      font-size: 0.9rem;
+    }
+
+    .CodeMirror {
+      height: 360px;
+      font-size: 15px;
+      border-top: 1px solid #1d2940;
+      border-bottom: 1px solid #1d2940;
+    }
+
+    #output {
+      min-height: 180px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 14px;
+      background: #030813;
+      color: #c8ffd8;
+      font-family: monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .challenge-box {
+      background: #09111d;
+      border: 1px solid #1c2b45;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .challenge-level {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #12203a;
+      color: #79afff;
+      border: 1px solid #27426f;
+      margin-bottom: 10px;
+    }
+
+    .challenge-title {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .challenge-text,
+    .challenge-hint,
+    .challenge-solution {
+      font-size: 0.94rem;
+      line-height: 1.55;
+      color: #d4e2ff;
+      white-space: pre-wrap;
+    }
+
+    .challenge-hint,
+    .challenge-solution {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #0c1728;
+      border: 1px solid #1c2b45;
+      display: none;
+    }
+
+    .meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .meta span {
+      background: #101b2f;
+      border: 1px solid #243758;
+      color: #a9c5ff;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .footer-note {
+      padding: 0 14px 20px;
+      text-align: center;
+      color: #7083a8;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    @media (min-width: 900px) {
+      .grid {
+        grid-template-columns: 1.15fr 0.85fr;
+        align-items: start;
+      }
+
+      .challenge-select-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto auto auto auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .challenge-select-row select {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 899px) {
+      .challenge-select-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .toolbar button,
+      .challenge-toolbar button,
+      .challenge-select-row button,
+      .challenge-select-row select {
+        width: 100%;
+      }
+
+      .CodeMirror {
+        height: 320px;
+      }
+
+      header h1 {
+        font-size: 1.18rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="brand-badge">RAY</span>
+      <h1>Ray's PyRace Python IDE</h1>
+    </div>
+    <p>
+      Practice Python on your phone, run code in the browser, and try randomized challenges.
+    </p>
+  </header>
+
+  <div class="container">
+    <div class="grid">
+      <div class="left-column">
+        <div class="card">
+          <div class="card-title">Python Editor</div>
+          <div class="status" id="status">Loading Python engine...</div>
+          <textarea id="code">print("Welcome to Ray's PyRace Python IDE")
+name = input("What is your name? ")
+print("Hello, " + name + "!")
+
+score = 72
+
+if score >= 50:
+    print("You passed.")
+else:
+    print("You failed.")</textarea>
+
+          <div class="section-body">
+            <div class="toolbar">
+              <button type="button" class="btn-run" id="runBtn">Run Code</button>
+              <button type="button" class="btn-clear-output" id="clearOutputBtn">Clear Output</button>
+              <button type="button" class="btn-clear-code" id="clearCodeBtn">Clear Code</button>
+              <button type="button" class="btn-reset" id="resetCodeBtn">Reset Example</button>
+              <button type="button" class="btn-save" id="saveCodeBtn">Save My Code</button>
+              <button type="button" class="btn-load" id="loadSavedBtn">Load Saved Code</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Output Console</div>
+          <div id="output"></div>
+        </div>
+      </div>
+
+      <div class="right-column">
+        <div class="card">
+          <div class="card-title">Challenge Mode</div>
+          <div class="section-body">
+            <div class="challenge-select-row">
+              <select id="challengeSourceSelect">
+                <option value="PyRace">PyRace Original</option>
+                <option value="100Days">100 Days Style</option>
+              </select>
+
+              <select id="levelSelect">
+                <option value="Amateur">Amateur</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+                <option value="Expert">Expert</option>
+                <option value="God Level">God Level</option>
+              </select>
+
+              <button type="button" class="btn-challenge" id="newChallengeBtn">New Challenge</button>
+              <button type="button" class="btn-use" id="useChallengeBtn">Use Starter Code</button>
+              <button type="button" class="btn-hint" id="showHintBtn">Show Hint</button>
+              <button type="button" class="btn-solution" id="showSolutionBtn">Show Solution</button>
+            </div>
+
+            <div class="challenge-box" style="margin-top: 14px;">
+              <div class="challenge-level" id="challengeLevelBadge">No challenge loaded</div>
+              <div class="challenge-title" id="challengeTitle">Tap “New Challenge” to generate a randomized Python task.</div>
+              <div class="challenge-text" id="challengeText">
+Choose a source and level, then generate a challenge.
+The task, hint, solution idea, and starter code will change each time.
+              </div>
+
+              <div class="meta" id="challengeMeta">
+                <span>Optimized for mobile</span>
+                <span>Randomized</span>
+                <span>Python practice</span>
+              </div>
+
+              <div class="challenge-hint" id="challengeHint"></div>
+              <div class="challenge-solution" id="challengeSolution"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Ray's PyRace keeps challenges lightweight and generated from many combinations so it stays fast on mobile.
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+
+  <script>
+    const defaultCode = `print("Welcome to Ray's PyRace Python IDE")
+name = input("What is your name? ")
+print("Hello, " + name + "!")
+
+score = 72
+
+if score >= 50:
+    print("You passed.")
+else:
+    print("You failed.")`;
+
+    const outputEl = document.getElementById("output");
+    const statusEl = document.getElementById("status");
+
+    const challengeLevelBadge = document.getElementById("challengeLevelBadge");
+    const challengeTitle = document.getElementById("challengeTitle");
+    const challengeText = document.getElementById("challengeText");
+    const challengeHint = document.getElementById("challengeHint");
+    const challengeSolution = document.getElementById("challengeSolution");
+
+    const runBtn = document.getElementById("runBtn");
+    const clearOutputBtn = document.getElementById("clearOutputBtn");
+    const clearCodeBtn = document.getElementById("clearCodeBtn");
+    const resetCodeBtn = document.getElementById("resetCodeBtn");
+    const saveCodeBtn = document.getElementById("saveCodeBtn");
+    const loadSavedBtn = document.getElementById("loadSavedBtn");
+
+    const challengeSourceSelect = document.getElementById("challengeSourceSelect");
+    const levelSelect = document.getElementById("levelSelect");
+    const newChallengeBtn = document.getElementById("newChallengeBtn");
+    const useChallengeBtn = document.getElementById("useChallengeBtn");
+    const showHintBtn = document.getElementById("showHintBtn");
+    const showSolutionBtn = document.getElementById("showSolutionBtn");
+
+    const editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+      mode: "python",
+      theme: "material-darker",
+      lineNumbers: true,
+      indentUnit: 4,
+      tabSize: 4,
+      lineWrapping: true,
+      autofocus: false
+    });
+
+    let pyodide = null;
+    let currentChallenge = null;
+    const nativePrompt = window.prompt.bind(window);
+
+    function writeOutput(text) {
+      outputEl.textContent += text + "\n";
+      outputEl.scrollTop = outputEl.scrollHeight;
+    }
+
+    function clearOutput() {
+      outputEl.textContent = "";
+    }
+
+    function blurEditorAndKeyboard() {
+      try {
+        editor.getInputField().blur();
+      } catch (e) {}
+      if (document.activeElement && typeof document.activeElement.blur === "function") {
+        document.activeElement.blur();
+      }
+    }
+
+    function safeButtonAction(action) {
+      return (event) => {
+        event.preventDefault();
+        blurEditorAndKeyboard();
+        setTimeout(action, 20);
+      };
+    }
+
+    async function loadPython() {
+      try {
+        pyodide = await loadPyodide();
+        statusEl.textContent = "Python engine ready";
+      } catch (error) {
+        statusEl.textContent = "Failed to load Python engine";
+        writeOutput("Error loading Pyodide: " + error);
+      }
+    }
+
+    async function runPythonCode() {
+      blurEditorAndKeyboard();
+
+      if (!pyodide) {
+        writeOutput("Python engine is still loading...");
+        return;
+      }
+
+      clearOutput();
+      statusEl.textContent = "Running...";
+
+      const code = editor.getValue();
+
+      try {
+        pyodide.setStdout({
+          batched: (text) => writeOutput(text)
+        });
+
+        pyodide.setStderr({
+          batched: (text) => writeOutput(text)
+        });
+
+        pyodide.globals.set("js_prompt", (message) => {
+          return nativePrompt(message || "") ?? "";
+        });
+
+        await pyodide.runPythonAsync(`
+import builtins
+
+def browser_input(message=""):
+    return js_prompt(message)
+
+builtins.input = browser_input
+        `);
+
+        await pyodide.runPythonAsync(code);
+        statusEl.textContent = "Finished";
+      } catch (error) {
+        writeOutput("Error: " + error);
+        statusEl.textContent = "Execution failed";
+      }
+    }
+
+    function saveMyCode() {
+      localStorage.setItem("ray_pyrace_saved_code", editor.getValue());
+      statusEl.textContent = "Code saved on this device";
+    }
+
+    function loadSavedCode() {
+      const saved = localStorage.getItem("ray_pyrace_saved_code");
+      if (saved) {
+        editor.setValue(saved);
+        statusEl.textContent = "Saved code loaded";
+      } else {
+        statusEl.textContent = "No saved code found";
+      }
+    }
+
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function randomName() {
+      return pick(["Ray", "Lebo", "Musa", "Tina", "Neo", "Ava", "Kai", "Zoe", "Sam", "Liam"]);
+    }
+
+    function randomFruit() {
+      return pick(["apple", "banana", "mango", "orange", "grape", "pear"]);
+    }
+
+    function randomAnimal() {
+      return pick(["lion", "tiger", "rabbit", "eagle", "shark", "panda"]);
+    }
+
+    function randomWord() {
+      return pick(["python", "future", "logic", "mobile", "rocket", "storm", "matrix", "code"]);
+    }
+
+    function buildChallenge(level) {
+      const source = challengeSourceSelect.value;
+
+      const a = randInt(2, 30);
+      const b = randInt(2, 30);
+      const c = randInt(3, 15);
+      const d = randInt(10, 100);
+      const name = randomName();
+      const fruit = randomFruit();
+      const animal = randomAnimal();
+      const word = randomWord();
+
+      if (source === "100Days") {
+        const hundredDaysPools = {
+          "Amateur": [
+            {
+              title: "Band Name Style Challenge",
+              text: `Ask the user for the city they grew up in and the name of a pet. Then print a fun band name using both values.`,
+              hint: `Use two input() calls and combine the answers in print().`,
+              solution: `city = input("Which city did you grow up in? ")\npet = input("What is your pet's name? ")\nprint("Your band name could be " + city + " " + pet)`,
+              starter: `city = input("Which city did you grow up in? ")\npet = input("What is your pet's name? ")\n`
+            },
+            {
+              title: "Simple Greeting",
+              text: `Ask the user for their name and print a welcome message.`,
+              hint: `Use input() and print().`,
+              solution: `name = input("What is your name? ")\nprint("Welcome, " + name)`,
+              starter: `name = input("What is your name? ")\n`
+            },
+            {
+              title: "String Length",
+              text: `Store "${word}" in a variable and print how many characters it has.`,
+              hint: `Use len().`,
+              solution: `word = "${word}"\nprint(len(word))`,
+              starter: `word = "${word}"\n`
+            }
+          ],
+          "Beginner": [
+            {
+              title: "Bill Splitter Style",
+              text: `A bill costs ${d}. Split it equally between ${c} people and print the amount each person should pay.`,
+              hint: `Divide the bill by the number of people.`,
+              solution: `bill = ${d}\npeople = ${c}\nprint(bill / people)`,
+              starter: `bill = ${d}\npeople = ${c}\n`
+            },
+            {
+              title: "BMI Style Starter",
+              text: `Height is 1.${randInt(5,9)}m and weight is ${randInt(45,95)}kg. Calculate BMI using weight / height ** 2.`,
+              hint: `Use exponentiation with **.`,
+              solution: `height = 1.7\nweight = 65\nbmi = weight / (height ** 2)\nprint(bmi)`,
+              starter: `height = 1.7\nweight = 65\n`
+            },
+            {
+              title: "Odd or Even",
+              text: `Check whether ${a} is odd or even.`,
+              hint: `Use % 2.`,
+              solution: `num = ${a}\nif num % 2 == 0:\n    print("Even")\nelse:\n    print("Odd")`,
+              starter: `num = ${a}\n`
+            }
+          ],
+          "Intermediate": [
+            {
+              title: "Treasure Choice Style",
+              text: `Ask the user to choose left or right. If they choose left, print "Safe path". Otherwise print "Game over".`,
+              hint: `Use if/else with string comparison.`,
+              solution: `choice = input("Left or right? ").lower()\nif choice == "left":\n    print("Safe path")\nelse:\n    print("Game over")`,
+              starter: `choice = input("Left or right? ").lower()\n`
+            },
+            {
+              title: "Love Score Style Logic",
+              text: `Given the names "${name}" and "${randomName()}", count how many times the letters in TRUE appear in both names combined.`,
+              hint: `Convert everything to lowercase first.`,
+              solution: `name1 = "${name}".lower()\nname2 = "${randomName()}".lower()\ncombined = name1 + name2\nscore = combined.count("t") + combined.count("r") + combined.count("u") + combined.count("e")\nprint(score)`,
+              starter: `name1 = "${name}".lower()\nname2 = "${randomName()}".lower()\ncombined = name1 + name2\n`
+            },
+            {
+              title: "Random Choice Style",
+              text: `Create a list of 4 names and randomly print one winner.`,
+              hint: `Use random.choice().`,
+              solution: `import random\nnames = ["Ray", "Lebo", "Neo", "Tina"]\nprint(random.choice(names))`,
+              starter: `import random\nnames = ["Ray", "Lebo", "Neo", "Tina"]\n`
+            }
+          ],
+          "Advanced": [
+            {
+              title: "Caesar Shift Style",
+              text: `Shift each letter in "${word}" by 1 position forward in the alphabet. You can keep it simple and only handle lowercase letters.`,
+              hint: `Use ord() and chr().`,
+              solution: `text = "${word}"\nresult = ""\nfor ch in text:\n    if "a" <= ch <= "z":\n        result += chr(((ord(ch) - 97 + 1) % 26) + 97)\n    else:\n        result += ch\nprint(result)`,
+              starter: `text = "${word}"\nresult = ""\n`
+            },
+            {
+              title: "Auction Style Dictionary",
+              text: `Create a dictionary of 3 bidders and their bids, then print the highest bid.`,
+              hint: `Use max() on dictionary values.`,
+              solution: `bids = {"Ray": ${a}, "Neo": ${b}, "Tina": ${d}}\nprint(max(bids.values()))`,
+              starter: `bids = {"Ray": ${a}, "Neo": ${b}, "Tina": ${d}}\n`
+            },
+            {
+              title: "Calculator Function Style",
+              text: `Write a function that multiplies two numbers and test it with ${a} and ${b}.`,
+              hint: `Use def and return.`,
+              solution: `def multiply(x, y):\n    return x * y\n\nprint(multiply(${a}, ${b}))`,
+              starter: `def multiply(x, y):\n    pass\n`
+            }
+          ],
+          "Expert": [
+            {
+              title: "Guessing Game Style",
+              text: `Generate a random number from 1 to 10 and let the user guess once. Print "Correct" or "Wrong".`,
+              hint: `Use random.randint().`,
+              solution: `import random\nanswer = random.randint(1, 10)\nguess = int(input("Guess a number from 1 to 10: "))\nif guess == answer:\n    print("Correct")\nelse:\n    print("Wrong")`,
+              starter: `import random\nanswer = random.randint(1, 10)\nguess = int(input("Guess a number from 1 to 10: "))\n`
+            },
+            {
+              title: "Higher Lower Style Data",
+              text: `Given followers ${d} and ${randInt(10,100)}, print which one is larger.`,
+              hint: `Just compare the two numbers.`,
+              solution: `a = ${d}\nb = ${randInt(10,100)}\nif a > b:\n    print("First is larger")\nelse:\n    print("Second is larger")`,
+              starter: `a = ${d}\nb = ${randInt(10,100)}\n`
+            },
+            {
+              title: "Coffee Machine Style Resource Check",
+              text: `There are ${a} cups and ${b} customers. Print "Enough" if cups are enough, otherwise print "Not enough".`,
+              hint: `Compare cups and customers.`,
+              solution: `cups = ${a}\ncustomers = ${b}\nif cups >= customers:\n    print("Enough")\nelse:\n    print("Not enough")`,
+              starter: `cups = ${a}\ncustomers = ${b}\n`
+            }
+          ],
+          "God Level": [
+            {
+              title: "Blackjack Total Style",
+              text: `Given the cards [${a}, ${b}, ${c}], calculate the total and print "Bust" if over 21, otherwise print the total.`,
+              hint: `Use sum().`,
+              solution: `cards = [${a}, ${b}, ${c}]\ntotal = sum(cards)\nif total > 21:\n    print("Bust")\nelse:\n    print(total)`,
+              starter: `cards = [${a}, ${b}, ${c}]\n`
+            },
+            {
+              title: "Mini Quiz Game Style",
+              text: `Ask one question: "What is 2 + 2?" If the answer is 4, print "Correct", else print "Wrong".`,
+              hint: `Use int(input()).`,
+              solution: `answer = int(input("What is 2 + 2? "))\nif answer == 4:\n    print("Correct")\nelse:\n    print("Wrong")`,
+              starter: `answer = int(input("What is 2 + 2? "))\n`
+            },
+            {
+              title: "Silent Auction Winner Style",
+              text: `Create a dictionary with 4 bids and print the name of the person with the highest bid.`,
+              hint: `Loop through items or use max() with key=.`,
+              solution: `bids = {"Ray": ${a}, "Neo": ${b}, "Tina": ${c}, "Kai": ${d}}\nwinner = max(bids, key=bids.get)\nprint(winner)`,
+              starter: `bids = {"Ray": ${a}, "Neo": ${b}, "Tina": ${c}, "Kai": ${d}}\n`
+            }
+          ]
+        };
+
+        const selected = pick(hundredDaysPools[level]);
+        return {
+          source,
+          level,
+          title: selected.title,
+          text: selected.text,
+          hint: selected.hint,
+          solution: selected.solution,
+          starter: selected.starter
+        };
+      }
+
+      const challengePools = {
+        "Amateur": [
+          {
+            title: "Print and Personalize",
+            text: `Ask the user for their name and print a welcome message that includes the name.`,
+            hint: `Use input() to collect the name, then print() to display it.`,
+            solution: `Use a variable like name = input("Enter your name: ") and then print("Welcome, " + name)`,
+            starter: `name = input("Enter your name: ")\n# print a welcome message below\n`
+          },
+          {
+            title: "Simple Addition",
+            text: `Create two variables with the values ${a} and ${b}. Print their sum.`,
+            hint: `Store the numbers in variables, then add them.`,
+            solution: `x = ${a}\ny = ${b}\nprint(x + y)`,
+            starter: `x = ${a}\ny = ${b}\n# print the sum below\n`
+          },
+          {
+            title: "Favorite Thing",
+            text: `Ask the user for their favorite fruit and print: "I like ____ too!"`,
+            hint: `Use input() and string concatenation.`,
+            solution: `fruit = input("What is your favorite fruit? ")\nprint("I like " + fruit + " too!")`,
+            starter: `fruit = input("What is your favorite fruit? ")\n`
+          },
+          {
+            title: "Repeat a Word",
+            text: `Store the word "${word}" in a variable and print it 3 times on separate lines.`,
+            hint: `You can use three print statements or a loop.`,
+            solution: `word = "${word}"\nprint(word)\nprint(word)\nprint(word)`,
+            starter: `word = "${word}"\n`
+          }
+        ],
+        "Beginner": [
+          {
+            title: "Pass or Fail",
+            text: `A learner scored ${d}. If the score is 50 or more, print "Pass", otherwise print "Fail".`,
+            hint: `Use if/else.`,
+            solution: `score = ${d}\nif score >= 50:\n    print("Pass")\nelse:\n    print("Fail")`,
+            starter: `score = ${d}\n# write your if/else below\n`
+          },
+          {
+            title: "Even or Odd",
+            text: `Use the number ${a}. Print "Even" if it is even, otherwise print "Odd".`,
+            hint: `Use % 2.`,
+            solution: `num = ${a}\nif num % 2 == 0:\n    print("Even")\nelse:\n    print("Odd")`,
+            starter: `num = ${a}\n`
+          },
+          {
+            title: "Age Check",
+            text: `Ask the user for their age. If the age is 18 or more, print "Adult", else print "Minor".`,
+            hint: `Convert input to int.`,
+            solution: `age = int(input("Enter your age: "))\nif age >= 18:\n    print("Adult")\nelse:\n    print("Minor")`,
+            starter: `age = int(input("Enter your age: "))\n`
+          },
+          {
+            title: "Animal Sound",
+            text: `Store "${animal}" in a variable and print a message saying that the animal is ready for a race.`,
+            hint: `This is mostly string output practice.`,
+            solution: `animal = "${animal}"\nprint(animal + " is ready for the race!")`,
+            starter: `animal = "${animal}"\n`
+          }
+        ],
+        "Intermediate": [
+          {
+            title: "Count with a Loop",
+            text: `Use a loop to print numbers from 1 to ${c}.`,
+            hint: `range(1, end + 1)`,
+            solution: `for i in range(1, ${c} + 1):\n    print(i)`,
+            starter: `# print 1 to ${c}\n`
+          },
+          {
+            title: "Sum a Range",
+            text: `Calculate the total of all numbers from 1 to ${c} and print the result.`,
+            hint: `Start with total = 0 and add each number in a loop.`,
+            solution: `total = 0\nfor i in range(1, ${c} + 1):\n    total += i\nprint(total)`,
+            starter: `total = 0\n`
+          },
+          {
+            title: "Word Length",
+            text: `Store the word "${word}" and print how many letters it has.`,
+            hint: `Use len().`,
+            solution: `word = "${word}"\nprint(len(word))`,
+            starter: `word = "${word}"\n`
+          },
+          {
+            title: "List Average",
+            text: `Create a list containing ${a}, ${b}, and ${c}. Print the average.`,
+            hint: `Add the numbers, then divide by the amount of items.`,
+            solution: `nums = [${a}, ${b}, ${c}]\nprint(sum(nums) / len(nums))`,
+            starter: `nums = [${a}, ${b}, ${c}]\n`
+          }
+        ],
+        "Advanced": [
+          {
+            title: "Function: Square Number",
+            text: `Write a function called square_num that takes a number and returns its square. Test it with ${b}.`,
+            hint: `Use def and return.`,
+            solution: `def square_num(n):\n    return n * n\n\nprint(square_num(${b}))`,
+            starter: `def square_num(n):\n    # return the square\n    pass\n\n`
+          },
+          {
+            title: "Filter Even Numbers",
+            text: `Given the list [${a}, ${b}, ${c}, ${d}], print only the even numbers.`,
+            hint: `Loop through the list and test each number with % 2.`,
+            solution: `nums = [${a}, ${b}, ${c}, ${d}]\nfor num in nums:\n    if num % 2 == 0:\n        print(num)`,
+            starter: `nums = [${a}, ${b}, ${c}, ${d}]\n`
+          },
+          {
+            title: "Count Vowels",
+            text: `Count how many vowels are in the word "${word}".`,
+            hint: `Loop through the string and compare each letter with vowels.`,
+            solution: `word = "${word}"\nvowels = "aeiou"\ncount = 0\nfor ch in word:\n    if ch.lower() in vowels:\n        count += 1\nprint(count)`,
+            starter: `word = "${word}"\n`
+          },
+          {
+            title: "Dictionary Access",
+            text: `Create a dictionary for a user named "${name}" with an age of ${a}. Print the age only.`,
+            hint: `Use a key like "age".`,
+            solution: `user = {"name": "${name}", "age": ${a}}\nprint(user["age"])`,
+            starter: `user = {"name": "${name}", "age": ${a}}\n`
+          }
+        ],
+        "Expert": [
+          {
+            title: "Prime Check",
+            text: `Check whether ${d} is a prime number and print True or False.`,
+            hint: `Test divisibility from 2 up to sqrt(n).`,
+            solution: `n = ${d}\nif n < 2:\n    print(False)\nelse:\n    is_prime = True\n    for i in range(2, int(n ** 0.5) + 1):\n        if n % i == 0:\n            is_prime = False\n            break\n    print(is_prime)`,
+            starter: `n = ${d}\n`
+          },
+          {
+            title: "Reverse Without Slicing",
+            text: `Reverse the word "${word}" using a loop, not slicing.`,
+            hint: `Build a new string one letter at a time.`,
+            solution: `word = "${word}"\nreversed_word = ""\nfor ch in word:\n    reversed_word = ch + reversed_word\nprint(reversed_word)`,
+            starter: `word = "${word}"\nreversed_word = ""\n`
+          },
+          {
+            title: "Unique Items",
+            text: `From the list [${a}, ${b}, ${a}, ${c}, ${b}], print only the unique values.`,
+            hint: `A set can help.`,
+            solution: `nums = [${a}, ${b}, ${a}, ${c}, ${b}]\nprint(list(set(nums)))`,
+            starter: `nums = [${a}, ${b}, ${a}, ${c}, ${b}]\n`
+          },
+          {
+            title: "Character Frequency",
+            text: `Count how many times each character appears in "${word}".`,
+            hint: `Use a dictionary and update counts.`,
+            solution: `word = "${word}"\ncounts = {}\nfor ch in word:\n    counts[ch] = counts.get(ch, 0) + 1\nprint(counts)`,
+            starter: `word = "${word}"\ncounts = {}\n`
+          }
+        ],
+        "God Level": [
+          {
+            title: "Mini Score Analyzer",
+            text: `Given the list [${a}, ${b}, ${c}, ${d}], print the highest value, lowest value, and average.`,
+            hint: `Use max(), min(), sum(), and len().`,
+            solution: `scores = [${a}, ${b}, ${c}, ${d}]\nprint("Highest:", max(scores))\nprint("Lowest:", min(scores))\nprint("Average:", sum(scores) / len(scores))`,
+            starter: `scores = [${a}, ${b}, ${c}, ${d}]\n`
+          },
+          {
+            title: "Word Transformation",
+            text: `Take the word "${word}" and print it in uppercase, lowercase, and reversed order.`,
+            hint: `Use upper(), lower(), and reversing logic.`,
+            solution: `word = "${word}"\nprint(word.upper())\nprint(word.lower())\nprint(word[::-1])`,
+            starter: `word = "${word}"\n`
+          },
+          {
+            title: "Function + Loop Combo",
+            text: `Write a function that takes a list of numbers and returns how many are greater than ${c}. Test it on [${a}, ${b}, ${c}, ${d}].`,
+            hint: `Loop through the list inside a function and count matches.`,
+            solution: `def count_greater(nums, limit):\n    count = 0\n    for n in nums:\n        if n > limit:\n            count += 1\n    return count\n\nprint(count_greater([${a}, ${b}, ${c}, ${d}], ${c}))`,
+            starter: `def count_greater(nums, limit):\n    count = 0\n    # finish the function\n    return count\n\n`
+          },
+          {
+            title: "Text Pattern",
+            text: `Print a triangle pattern using * with ${c} rows.`,
+            hint: `Use a loop and multiply the string "*" by the row number.`,
+            solution: `for i in range(1, ${c} + 1):\n    print("*" * i)`,
+            starter: `# print a triangle with ${c} rows\n`
+          }
+        ]
+      };
+
+      const selected = pick(challengePools[level]);
+
+      return {
+        source,
+        level,
+        title: selected.title,
+        text: selected.text,
+        hint: selected.hint,
+        solution: selected.solution,
+        starter: selected.starter
+      };
+    }
+
+    function renderChallenge(challenge) {
+      challengeLevelBadge.textContent = `${challenge.source} • ${challenge.level}`;
+      challengeTitle.textContent = challenge.title;
+      challengeText.textContent = challenge.text;
+      challengeHint.textContent = "Hint: " + challenge.hint;
+      challengeSolution.textContent = "Solution idea:\n" + challenge.solution;
+      challengeHint.style.display = "none";
+      challengeSolution.style.display = "none";
+    }
+
+    function generateChallenge() {
+      currentChallenge = buildChallenge(levelSelect.value);
+      renderChallenge(currentChallenge);
+      statusEl.textContent = "New challenge generated";
+    }
+
+    function useChallengeStarter() {
+      if (!currentChallenge) {
+        generateChallenge();
+      }
+      editor.setValue(currentChallenge.starter);
+      statusEl.textContent = "Starter code loaded into editor";
+      blurEditorAndKeyboard();
+    }
+
+    function showHint() {
+      if (!currentChallenge) return;
+      challengeHint.style.display = "block";
+    }
+
+    function showSolution() {
+      if (!currentChallenge) return;
+      challengeSolution.style.display = "block";
+    }
+
+    runBtn.addEventListener("click", safeButtonAction(runPythonCode));
+    clearOutputBtn.addEventListener("click", safeButtonAction(() => {
+      clearOutput();
+      statusEl.textContent = "Output cleared";
+    }));
+    clearCodeBtn.addEventListener("click", safeButtonAction(() => {
+      editor.setValue("");
+      statusEl.textContent = "Editor cleared";
+    }));
+    resetCodeBtn.addEventListener("click", safeButtonAction(() => {
+      editor.setValue(defaultCode);
+      clearOutput();
+      statusEl.textContent = "Example restored";
+    }));
+    saveCodeBtn.addEventListener("click", safeButtonAction(saveMyCode));
+    loadSavedBtn.addEventListener("click", safeButtonAction(loadSavedCode));
+    newChallengeBtn.addEventListener("click", safeButtonAction(generateChallenge));
+    useChallengeBtn.addEventListener("click", safeButtonAction(useChallengeStarter));
+    showHintBtn.addEventListener("click", safeButtonAction(showHint));
+    showSolutionBtn.addEventListener("click", safeButtonAction(showSolution));
+
+    ["touchstart", "mousedown"].forEach(evt => {
+      [
+        clearOutputBtn,
+        clearCodeBtn,
+        resetCodeBtn,
+        saveCodeBtn,
+        loadSavedBtn,
+        newChallengeBtn,
+        useChallengeBtn,
+        showHintBtn,
+        showSolutionBtn,
+        runBtn
+      ].forEach(btn => {
+        btn.addEventListener(evt, () => {
+          blurEditorAndKeyboard();
+        }, { passive: true });
+      });
+    });
+
+    loadPython();
+  </script>
+</body>
+</html>      border-bottom: 1px solid #1f2937;
     }
 
     header h1 {
