@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Practice IDE</title>
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css"
+  />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b0f17;
+      color: #e6edf3;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 16px;
+      text-align: center;
+      background: #111827;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      color: #ffffff;
+    }
+
+    header p {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .panel {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel-title {
+      padding: 12px 14px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      border-bottom: 1px solid #1f2937;
+      background: #0f172a;
+    }
+
+    .editor-wrap {
+      padding: 0;
+    }
+
+    .CodeMirror {
+      height: 380px;
+      font-size: 15px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 14px;
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 14px;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .run-btn {
+      background: #22c55e;
+      color: #08110b;
+    }
+
+    .run-btn:hover {
+      opacity: 0.9;
+    }
+
+    .clear-btn {
+      background: #374151;
+      color: white;
+    }
+
+    .clear-btn:hover {
+      background: #4b5563;
+    }
+
+    .reset-btn {
+      background: #2563eb;
+      color: white;
+    }
+
+    .reset-btn:hover {
+      opacity: 0.9;
+    }
+
+    .status {
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      color: #93c5fd;
+    }
+
+    #output {
+      min-height: 220px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding: 14px;
+      background: #020617;
+      color: #d1fae5;
+      font-family: monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.8rem;
+      padding: 10px 16px 18px;
+    }
+
+    @media (max-width: 768px) {
+      .CodeMirror {
+        height: 300px;
+        font-size: 14px;
+      }
+
+      button {
+        flex: 1 1 100%;
+      }
+
+      header h1 {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Python Practice IDE</h1>
+    <p>Run Python directly on your phone from your site</p>
+  </header>
+
+  <div class="container">
+    <div class="panel">
+      <div class="panel-title">Python Editor</div>
+      <div class="editor-wrap">
+        <textarea id="code">
+print("Welcome to your Python Practice IDE")
+name = input("What is your name? ")
+print("Hello, " + name + "!")
+
+age = 20
+if age >= 18:
+    print("You are an adult.")
+else:
+    print("You are a minor.")
+        </textarea>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="run-btn" id="runBtn">Run Code</button>
+      <button class="clear-btn" id="clearOutputBtn">Clear Output</button>
+      <button class="reset-btn" id="resetCodeBtn">Reset Example</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Output Console</div>
+      <div class="status" id="status">Loading Python engine...</div>
+      <div id="output"></div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Built with HTML, CSS, JavaScript and Pyodide
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+
+  <script>
+    const defaultCode = `print("Welcome to your Python Practice IDE")
+name = input("What is your name? ")
+print("Hello, " + name + "!")
+
+age = 20
+if age >= 18:
+    print("You are an adult.")
+else:
+    print("You are a minor.")`;
+
+    const outputEl = document.getElementById("output");
+    const statusEl = document.getElementById("status");
+    const runBtn = document.getElementById("runBtn");
+    const clearOutputBtn = document.getElementById("clearOutputBtn");
+    const resetCodeBtn = document.getElementById("resetCodeBtn");
+
+    const editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+      mode: "python",
+      theme: "material-darker",
+      lineNumbers: true,
+      indentUnit: 4,
+      tabSize: 4,
+      lineWrapping: true
+    });
+
+    let pyodide;
+
+    function writeOutput(text) {
+      outputEl.textContent += text + "\n";
+      outputEl.scrollTop = outputEl.scrollHeight;
+    }
+
+    async function main() {
+      pyodide = await loadPyodide();
+      statusEl.textContent = "Python engine ready";
+    }
+
+    async function runPythonCode() {
+      if (!pyodide) {
+        writeOutput("Python engine is still loading...");
+        return;
+      }
+
+      outputEl.textContent = "";
+      statusEl.textContent = "Running...";
+
+      const code = editor.getValue();
+
+      const inputValues = [];
+      let promptCount = 0;
+
+      const customPrompt = (msg = "") => {
+        const answer = window.prompt(msg) ?? "";
+        inputValues.push(answer);
+        promptCount++;
+        return answer;
+      };
+
+      window.prompt = customPrompt;
+
+      try {
+        pyodide.setStdout({
+          batched: (text) => {
+            writeOutput(text);
+          }
+        });
+
+        pyodide.setStderr({
+          batched: (text) => {
+            writeOutput(text);
+          }
+        });
+
+        pyodide.globals.set("js_prompt", customPrompt);
+
+        await pyodide.runPythonAsync(`
+import builtins
+
+def browser_input(message=""):
+    return js_prompt(message)
+
+builtins.input = browser_input
+        `);
+
+        await pyodide.runPythonAsync(code);
+        statusEl.textContent = "Finished";
+      } catch (error) {
+        writeOutput("Error: " + error);
+        statusEl.textContent = "Execution failed";
+      }
+    }
+
+    runBtn.addEventListener("click", runPythonCode);
+
+    clearOutputBtn.addEventListener("click", () => {
+      outputEl.textContent = "";
+      statusEl.textContent = "Output cleared";
+    });
+
+    resetCodeBtn.addEventListener("click", () => {
+      editor.setValue(defaultCode);
+      statusEl.textContent = "Example restored";
+    });
+
+    main();
+  </script>
+</body>
+</html>
