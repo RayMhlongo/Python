@@ -15,6 +15,13 @@ const manager = new RoomManager(store);
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+const roomSweepInterval = setInterval(() => {
+  const changedRooms = manager.sweepExpired();
+  changedRooms.forEach((roomId) => {
+    emitRoomState(roomId);
+  });
+}, 5000);
+let shuttingDown = false;
 
 app.use("/assets", express.static(ASSET_DIR));
 
@@ -33,6 +40,14 @@ app.get("/api/health", async (_request, response) => {
     persistenceEnabled: store.enabled,
     persistenceError: store.enabled ? "" : store.error,
     databasePath: store.databasePath || ""
+  });
+});
+
+app.get("/health", async (_request, response) => {
+  response.json({
+    ok: true,
+    persistenceBackend: store.kind,
+    persistenceEnabled: store.enabled
   });
 });
 
@@ -194,12 +209,30 @@ io.on("connection", (socket) => {
   });
 });
 
-setInterval(() => {
-  const changedRooms = manager.sweepExpired();
-  changedRooms.forEach((roomId) => {
-    emitRoomState(roomId);
+function shutdown(signal) {
+  if (shuttingDown) {
+    return;
+  }
+
+  shuttingDown = true;
+  clearInterval(roomSweepInterval);
+  console.log(`${signal} received. Shutting down Pyte room server...`);
+
+  io.close(() => {
+    server.close(() => {
+      store.close();
+      process.exit(0);
+    });
   });
-}, 5000);
+
+  setTimeout(() => {
+    store.close();
+    process.exit(1);
+  }, 10000).unref();
+}
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
 
 server.listen(PORT, () => {
   const persistenceState = store.enabled

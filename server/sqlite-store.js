@@ -20,6 +20,18 @@ function resolveDatabasePath(databasePathInput) {
     return databasePathInput;
   }
 
+  if (!databasePathInput) {
+    const mountedVolumePath = process.env.RAILWAY_VOLUME_MOUNT_PATH;
+
+    if (mountedVolumePath) {
+      return path.join(mountedVolumePath, "pyte-room.sqlite");
+    }
+
+    if (process.platform !== "win32" && fs.existsSync("/data")) {
+      return "/data/pyte-room.sqlite";
+    }
+  }
+
   const relativePath = databasePathInput || path.join("data", "pyte-room.sqlite");
   return path.resolve(__dirname, "..", relativePath);
 }
@@ -364,6 +376,15 @@ class SQLiteStore {
         error: error.message
       };
     }
+  }
+
+  close() {
+    if (!this.db) {
+      return;
+    }
+
+    this.db.close();
+    this.db = null;
   }
 }
 
