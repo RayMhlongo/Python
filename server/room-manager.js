@@ -26,8 +26,7 @@ function makeSystemMessage(text) {
 }
 
 class RoomManager {
-  constructor(store) {
-    this.store = store;
+  constructor() {
     this.rooms = new Map();
     this.socketIndex = new Map();
   }
@@ -324,8 +323,7 @@ class RoomManager {
     return {
       ok: true,
       roomId: membership.roomId,
-      state: this.serializeRoom(membership.roomId, room),
-      leaderboard: await this.store.getLeaderboard()
+      state: this.serializeRoom(membership.roomId, room)
     };
   }
 
@@ -402,17 +400,6 @@ class RoomManager {
 
     this.appendChatMessage(room, makeSystemMessage(winnerText));
 
-    await this.store.applyRoundResult({
-      roomId,
-      roundId: roundSummary.roundId,
-      challenge,
-      results,
-      sessionScores: room.sessionScores
-    });
-  }
-
-  async getLeaderboard() {
-    return this.store.getLeaderboard();
   }
 
   sweepExpired() {

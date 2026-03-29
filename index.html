@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Welcome to Phathu and Ray's Pyte enviroment</title>
+  <title>Welcome to Phathu and Ray's Pyte environment</title>
   <meta
     name="description"
-    content="A dark-mode browser Python IDE with a shared two-player practice room, live chat, challenge battles, and a SQLite-backed leaderboard."
+    content="A clean dark-mode Python practice space for solo coding, shared live rooms, chat, and challenge rounds."
   >
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,156 +27,74 @@
 <body>
   <div class="app-shell">
     <header class="hero">
-      <div class="hero-top">
-        <div>
-          <span class="brand-pill">Pyte Environment</span>
-          <h1>Welcome to Phathu and Ray's Pyte enviroment</h1>
-          <p>
-            Practice Python in the browser, then jump into a live shared room where Angel and
-            Beloved can chat, compete on challenges, and build a persistent leaderboard together.
-          </p>
-        </div>
-        <div class="hero-statuses">
-          <div class="status-pill" id="runtimeStatus" data-state="loading">Loading Python runtime...</div>
-          <div class="status-pill" id="socketStatus" data-state="loading">Connecting room server...</div>
-          <div class="status-pill" id="persistenceStatus" data-state="loading">Checking SQLite storage...</div>
-        </div>
+      <div class="hero-copy">
+        <span class="brand-pill">Pyte</span>
+        <h1>Welcome to Phathu and Ray's Pyte environment</h1>
+        <p>
+          Practice Python on your own, then jump into a shared room to chat, solve challenges,
+          and code live together.
+        </p>
       </div>
-      <div class="hero-meta">
-        <span class="meta-pill">Browser Python with Pyodide</span>
-        <span class="meta-pill">Socket.io shared room</span>
-        <span class="meta-pill">SQLite-backed stats and leaderboard</span>
+      <div class="hero-status">
+        <span class="status-label">Session</span>
+        <div class="status-pill" id="appStatus" data-state="loading">Connecting...</div>
       </div>
     </header>
 
-    <main class="page-grid">
-      <section class="stack">
-        <article class="card">
+    <main class="layout-grid">
+      <section class="main-column">
+        <article class="card practice-card">
           <div class="card-head">
             <div>
-              <h2 class="card-title">Join Practice Room</h2>
+              <h2 class="card-title">Python Practice Space</h2>
               <p class="card-copy">
-                Enter a room code, preview who is inside, then join as Angel or Beloved. Each identity
-                stays attached to the session until the user leaves the room.
-              </p>
-            </div>
-            <span class="mini-pill" id="roomHeadline">No room joined</span>
-          </div>
-          <div class="card-body stack-tight">
-            <div class="field-grid two-column">
-              <div class="field">
-                <label for="roomCodeInput">Room Code</label>
-                <input id="roomCodeInput" class="text-input" maxlength="24" placeholder="Example: PYTE-RACE" autocomplete="off">
-              </div>
-              <div class="field">
-                <label>Choose Identity</label>
-                <div class="identity-grid">
-                  <label class="identity-option" id="identityOptionAngel">
-                    <input type="radio" name="identity" value="Angel" checked>
-                    <span>Angel</span>
-                  </label>
-                  <label class="identity-option" id="identityOptionBeloved">
-                    <input type="radio" name="identity" value="Beloved">
-                    <span>Beloved</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="button-row">
-              <button class="button button-soft" id="checkRoomButton" type="button">Check Room</button>
-              <button class="button button-accent" id="joinRoomButton" type="button">Join Practice Room</button>
-              <button class="button button-secondary" id="leaveRoomButton" type="button" disabled>Leave Room</button>
-            </div>
-            <div class="notice-card" id="roomNotice">Choose a room code to preview availability.</div>
-            <div class="status-grid two-column">
-              <div class="subpanel">
-                <div class="subpanel-title">Room Status</div>
-                <div class="participant-list" id="participantList"></div>
-              </div>
-              <div class="subpanel">
-                <div class="subpanel-title">Current Session Score</div>
-                <div class="score-grid">
-                  <div class="score-box score-box-angel">
-                    <span class="score-name">Angel</span>
-                    <strong id="sessionAngelPoints">0</strong>
-                  </div>
-                  <div class="score-box score-box-beloved">
-                    <span class="score-name">Beloved</span>
-                    <strong id="sessionBelovedPoints">0</strong>
-                  </div>
-                </div>
-                <div class="subtle-line" id="sessionRoundStatus">Waiting for both players to connect.</div>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="card-head">
-            <div>
-              <h2 class="card-title">Python Editor</h2>
-              <p class="card-copy">
-                The IDE stays fully usable. You can still run Python in the browser while the shared room,
-                chat, and challenge system stay connected beside it.
+                Write code, run it, and read the result in one place.
               </p>
             </div>
           </div>
           <div class="editor-shell">
             <textarea id="codeEditor" aria-label="Python code editor"></textarea>
           </div>
-          <div class="card-body">
+          <div class="card-body stack-tight">
             <div class="button-row wrap">
               <button class="button button-run" id="runButton" type="button">Run Code</button>
-              <button class="button button-secondary" id="stopButton" type="button" disabled>Stop Run</button>
+              <button class="button button-secondary" id="stopButton" type="button" disabled>Stop</button>
               <button class="button button-soft" id="clearOutputButton" type="button">Clear Output</button>
               <button class="button button-soft" id="resetCodeButton" type="button">Reset Example</button>
               <button class="button button-accent" id="saveCodeButton" type="button">Save Locally</button>
               <button class="button button-soft" id="loadCodeButton" type="button">Load Saved</button>
             </div>
+            <div class="practice-grid">
+              <div class="field">
+                <label for="programInput">Program Input</label>
+                <p class="field-copy">If your code uses <code>input()</code>, add one answer per line.</p>
+                <textarea
+                  id="programInput"
+                  class="input-box"
+                  spellcheck="false"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  placeholder="Example:&#10;Ray&#10;72"
+                ></textarea>
+              </div>
+              <div class="field">
+                <label for="outputConsole">Output</label>
+                <p class="field-copy">The console shows the real result from your Python code.</p>
+                <pre id="outputConsole" class="console" aria-live="polite"></pre>
+              </div>
+            </div>
           </div>
         </article>
 
         <article class="card">
           <div class="card-head">
             <div>
-              <h2 class="card-title">Program Input and Output</h2>
+              <h2 class="card-title">Shared Challenge</h2>
               <p class="card-copy">
-                Add one answer per line for <code>input()</code>. The output console shows actual stdout
-                and errors only, not the source code you typed.
+                Start the same prompt for both players and race to answer it live.
               </p>
             </div>
-          </div>
-          <div class="card-body stack-tight">
-            <div class="field">
-              <label for="programInput">Program Input</label>
-              <textarea
-                id="programInput"
-                class="input-box"
-                spellcheck="false"
-                autocorrect="off"
-                autocapitalize="off"
-                placeholder="One input() value per line&#10;Example:&#10;Ray&#10;72"
-              ></textarea>
-            </div>
-            <div class="field">
-              <label for="outputConsole">Output Console</label>
-              <pre id="outputConsole" class="console" aria-live="polite"></pre>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      <section class="stack">
-        <article class="card">
-          <div class="card-head">
-            <div>
-              <h2 class="card-title">Shared Challenge Arena</h2>
-              <p class="card-copy">
-                Start a room challenge and race to submit a correct answer. The same round is synced live
-                to both identities, with fair scoring and duplicate-submission protection.
-              </p>
-            </div>
-            <span class="mini-pill" id="challengePhasePill">Waiting for players</span>
+            <span class="mini-pill" id="challengePhasePill">Waiting</span>
           </div>
           <div class="card-body stack-tight">
             <div class="button-row">
@@ -184,7 +102,7 @@
             </div>
             <div class="subpanel challenge-panel">
               <div class="subpanel-title" id="roomChallengeTitle">No live challenge yet</div>
-              <div class="subtle-line" id="roomChallengeMeta">Join a room with both identities connected to begin.</div>
+              <div class="subtle-line" id="roomChallengeMeta">Join a room with both people connected to begin.</div>
               <p class="challenge-text" id="roomChallengePrompt"></p>
               <pre class="challenge-code" id="roomChallengeCode" hidden></pre>
               <div class="choice-list" id="roomChallengeChoices"></div>
@@ -193,7 +111,7 @@
                 <textarea
                   id="challengeAnswerInput"
                   class="input-box short"
-                  placeholder="Your challenge answer will go here."
+                  placeholder="Type your answer here."
                   spellcheck="false"
                 ></textarea>
               </div>
@@ -202,9 +120,69 @@
               </div>
               <div class="notice-card" id="challengeResultSummary">Challenge results will appear here after the round ends.</div>
             </div>
-            <div class="subpanel">
-              <div class="subpanel-title">Round History</div>
+            <div class="card-toggle-row">
+              <button class="toggle-chip" id="toggleRoundHistoryButton" type="button" aria-expanded="false">Show recent rounds</button>
+            </div>
+            <div class="subpanel" id="roundHistoryPanel" hidden>
+              <div class="subpanel-title">Recent Rounds</div>
               <div class="round-history" id="roundHistoryList"></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <aside class="side-column">
+        <article class="card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">Practice Room</h2>
+              <p class="card-copy">
+                Pick a room code, choose your name, and connect when you are ready.
+              </p>
+            </div>
+            <span class="mini-pill" id="roomHeadline">Not in a room</span>
+          </div>
+          <div class="card-body stack-tight">
+            <div class="field">
+              <label for="roomCodeInput">Room Code</label>
+              <input id="roomCodeInput" class="text-input" maxlength="24" placeholder="Example: PYTE-RACE" autocomplete="off">
+            </div>
+            <div class="field">
+              <label>Choose Your Name</label>
+              <div class="identity-grid">
+                <label class="identity-option" id="identityOptionAngel">
+                  <input type="radio" name="identity" value="Angel" checked>
+                  <span>Angel</span>
+                </label>
+                <label class="identity-option" id="identityOptionBeloved">
+                  <input type="radio" name="identity" value="Beloved">
+                  <span>Beloved</span>
+                </label>
+              </div>
+            </div>
+            <div class="button-row">
+              <button class="button button-soft" id="checkRoomButton" type="button">Preview Room</button>
+              <button class="button button-accent" id="joinRoomButton" type="button">Join Room</button>
+              <button class="button button-secondary" id="leaveRoomButton" type="button" disabled>Leave</button>
+            </div>
+            <div class="notice-card" id="roomNotice">Enter a room code to see who is available.</div>
+            <div class="subpanel">
+              <div class="subpanel-title">Room Activity</div>
+              <div class="participant-list" id="participantList"></div>
+            </div>
+            <div class="subpanel" id="sessionScorePanel" hidden>
+              <div class="subpanel-title">Live Score</div>
+              <div class="score-grid">
+                <div class="score-box score-box-angel">
+                  <span class="score-name">Angel</span>
+                  <strong id="sessionAngelPoints">0</strong>
+                </div>
+                <div class="score-box score-box-beloved">
+                  <span class="score-name">Beloved</span>
+                  <strong id="sessionBelovedPoints">0</strong>
+                </div>
+              </div>
+              <div class="subtle-line" id="sessionRoundStatus">Scores appear once both players are active together.</div>
             </div>
           </div>
         </article>
@@ -214,60 +192,30 @@
             <div>
               <h2 class="card-title">Live Chat</h2>
               <p class="card-copy">
-                Chat in real time with system join and leave messages, subtle Angel and Beloved styling,
-                and clean ordering with no page refresh.
+                Send quick messages while you practice together.
               </p>
             </div>
           </div>
           <div class="card-body stack-tight">
             <div class="chat-panel" id="chatMessages"></div>
             <div class="chat-composer">
-              <textarea id="chatInput" class="input-box short" placeholder="Type a message for the room..." spellcheck="false"></textarea>
+              <textarea id="chatInput" class="input-box short" placeholder="Type a message..." spellcheck="false"></textarea>
               <button class="button button-accent" id="sendChatButton" type="button" disabled>Send</button>
             </div>
           </div>
         </article>
 
-        <article class="card">
+        <article class="card muted-card">
           <div class="card-head">
             <div>
-              <h2 class="card-title">Persistent Leaderboard</h2>
+              <h2 class="card-title">Solo Practice</h2>
               <p class="card-copy">
-                Total points, attempts, correct answers, wins, and streaks are stored through SQLite so the
-                leaderboard survives refreshes and future sessions.
+                Open extra prompts when you want something to work on alone.
               </p>
             </div>
+            <button class="toggle-chip" id="toggleSoloButton" type="button" aria-expanded="false">Open</button>
           </div>
-          <div class="card-body">
-            <div class="table-wrap">
-              <table class="leaderboard-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Points</th>
-                    <th>Correct</th>
-                    <th>Attempts</th>
-                    <th>Wins</th>
-                    <th>Best Streak</th>
-                  </tr>
-                </thead>
-                <tbody id="leaderboardBody"></tbody>
-              </table>
-            </div>
-            <div class="notice-card" id="leaderboardEmpty">Leaderboard data will appear here once the server responds.</div>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="card-head">
-            <div>
-              <h2 class="card-title">Solo Challenge Mode</h2>
-              <p class="card-copy">
-                The original solo challenge flow is still here for self-paced practice outside the room.
-              </p>
-            </div>
-          </div>
-          <div class="card-body stack-tight">
+          <div class="card-body stack-tight" id="soloPracticePanel" hidden>
             <div class="field-grid two-column">
               <div class="field">
                 <label for="challengeSource">Challenge Source</label>
@@ -309,7 +257,7 @@
             </div>
           </div>
         </article>
-      </section>
+      </aside>
     </main>
   </div>
 
@@ -317,7 +265,7 @@
     <div class="app-shell">
       <div class="card">
         <div class="card-body">
-          JavaScript is required for the in-browser Python runtime and the real-time room features.
+          JavaScript is required for the in-browser Python runtime and the live room features.
         </div>
       </div>
     </div>

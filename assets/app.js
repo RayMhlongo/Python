@@ -1,4 +1,4 @@
-const DEFAULT_CODE = `print("Welcome to Phathu and Ray's Pyte enviroment")
+const DEFAULT_CODE = `print("Welcome to Phathu and Ray's Pyte environment")
 name = input("What is your name? ")
 print(f"Hello, {name}!")
 
@@ -385,9 +385,7 @@ print(render(template, data))
 };
 
 const refs = {
-  runtimeStatus: document.getElementById("runtimeStatus"),
-  socketStatus: document.getElementById("socketStatus"),
-  persistenceStatus: document.getElementById("persistenceStatus"),
+  appStatus: document.getElementById("appStatus"),
   codeEditor: document.getElementById("codeEditor"),
   programInput: document.getElementById("programInput"),
   outputConsole: document.getElementById("outputConsole"),
@@ -404,6 +402,7 @@ const refs = {
   roomNotice: document.getElementById("roomNotice"),
   roomHeadline: document.getElementById("roomHeadline"),
   participantList: document.getElementById("participantList"),
+  sessionScorePanel: document.getElementById("sessionScorePanel"),
   sessionAngelPoints: document.getElementById("sessionAngelPoints"),
   sessionBelovedPoints: document.getElementById("sessionBelovedPoints"),
   sessionRoundStatus: document.getElementById("sessionRoundStatus"),
@@ -417,12 +416,14 @@ const refs = {
   challengeAnswerInput: document.getElementById("challengeAnswerInput"),
   submitChallengeAnswerButton: document.getElementById("submitChallengeAnswerButton"),
   challengeResultSummary: document.getElementById("challengeResultSummary"),
+  toggleRoundHistoryButton: document.getElementById("toggleRoundHistoryButton"),
+  roundHistoryPanel: document.getElementById("roundHistoryPanel"),
   roundHistoryList: document.getElementById("roundHistoryList"),
   chatMessages: document.getElementById("chatMessages"),
   chatInput: document.getElementById("chatInput"),
   sendChatButton: document.getElementById("sendChatButton"),
-  leaderboardBody: document.getElementById("leaderboardBody"),
-  leaderboardEmpty: document.getElementById("leaderboardEmpty"),
+  toggleSoloButton: document.getElementById("toggleSoloButton"),
+  soloPracticePanel: document.getElementById("soloPracticePanel"),
   challengeSource: document.getElementById("challengeSource"),
   challengeLevel: document.getElementById("challengeLevel"),
   newChallengeButton: document.getElementById("newChallengeButton"),
@@ -443,6 +444,7 @@ const refs = {
 const state = {
   editor: null,
   socket: null,
+  socketConnected: false,
   runtimeReady: false,
   isRunning: false,
   worker: null,
@@ -450,14 +452,94 @@ const state = {
   currentSoloChallenge: null,
   currentRoomState: null,
   previewState: null,
-  leaderboard: [],
   roomSession: loadRoomSession(),
-  persistenceBackend: "sqlite"
+  roundHistoryOpen: false,
+  soloPanelOpen: false,
+  statusOverride: null,
+  statusTimer: 0
 };
 
 function setStatus(element, message, mode) {
+  if (!element) {
+    return;
+  }
   element.textContent = message;
   element.dataset.state = mode;
+}
+
+function isLiveRoomConnected(roomState) {
+  return Boolean(
+    roomState &&
+      Array.isArray(roomState.participants) &&
+      roomState.participants.length === 2 &&
+      roomState.participants.every((participant) => participant.status === "connected")
+  );
+}
+
+function refreshAppStatus() {
+  if (state.statusOverride) {
+    setStatus(refs.appStatus, state.statusOverride.message, state.statusOverride.mode);
+    return;
+  }
+
+  if (!state.socketConnected && !state.runtimeReady) {
+    setStatus(refs.appStatus, "Connecting...", "loading");
+    return;
+  }
+
+  if (!state.socketConnected) {
+    setStatus(refs.appStatus, "Offline", "warning");
+    return;
+  }
+
+  if (!state.runtimeReady) {
+    setStatus(refs.appStatus, "Connecting...", "loading");
+    return;
+  }
+
+  if (state.isRunning) {
+    setStatus(refs.appStatus, "Running...", "running");
+    return;
+  }
+
+  if (state.roomSession && isLiveRoomConnected(state.currentRoomState)) {
+    setStatus(refs.appStatus, "Live room connected", "ready");
+    return;
+  }
+
+  setStatus(refs.appStatus, "Ready", "ready");
+}
+
+function flashAppStatus(message, mode, duration = 2200) {
+  window.clearTimeout(state.statusTimer);
+  state.statusOverride = { message, mode };
+  refreshAppStatus();
+
+  if (duration > 0) {
+    state.statusTimer = window.setTimeout(() => {
+      state.statusOverride = null;
+      refreshAppStatus();
+    }, duration);
+  }
+}
+
+function setPanelState(button, panel, isOpen, openLabel, closedLabel) {
+  if (panel) {
+    panel.hidden = !isOpen;
+  }
+
+  if (button) {
+    button.textContent = isOpen ? openLabel : closedLabel;
+    button.setAttribute("aria-expanded", String(isOpen));
+  }
+}
+
+function shouldShowSessionScore(roomState) {
+  if (!roomState) {
+    return false;
+  }
+
+  return isLiveRoomConnected(roomState) || Boolean(roomState.activeChallenge);
 }
 
 function safeStorageGet(key) {
@@ -596,9 +678,8 @@ function saveLocally() {
   const codeSaved = safeStorageSet(STORAGE_KEYS.savedCode, getEditorValue());
   const inputSaved = safeStorageSet(STORAGE_KEYS.savedInput, refs.programInput.value);
 
-  setStatus(
-    refs.runtimeStatus,
-    codeSaved && inputSaved ? "Code saved locally." : "Local save is unavailable in this browser.",
+  flashAppStatus(
+    codeSaved && inputSaved ? "Saved on this device." : "Could not save right now.",
     codeSaved && inputSaved ? "ready" : "warning"
   );
   updateLoadButtonState();
@@ -609,21 +690,21 @@ function loadSaved() {
   const savedInput = safeStorageGet(STORAGE_KEYS.savedInput);
 
   if (savedCode === null) {
-    setStatus(refs.runtimeStatus, "No saved code found on this device yet.", "warning");
+    flashAppStatus("No saved code found yet.", "warning");
     return;
   }
 
   setEditorValue(savedCode);
   refs.programInput.value = savedInput || "";
   storeDraft();
-  setStatus(refs.runtimeStatus, "Saved code restored into the editor.", "ready");
+  flashAppStatus("Saved code loaded.", "ready");
 }
 
 function resetExample() {
   setEditorValue(DEFAULT_CODE);
   refs.programInput.value = DEFAULT_INPUT;
   storeDraft();
-  setStatus(refs.runtimeStatus, "Starter example restored.", "ready");
+  flashAppStatus("Example restored.", "ready");
 }
 
 function initializeEditor() {
@@ -659,7 +740,7 @@ function initializeEditor() {
       refresh() {}
     };
     refs.codeEditor.addEventListener("input", storeDraftDebounced);
-    setStatus(refs.runtimeStatus, "Syntax highlighting did not load, but the plain editor is ready.", "warning");
+    flashAppStatus("Editor ready.", "warning");
   }
 
   restoreDraft();
@@ -690,15 +771,13 @@ function handleWorkerMessage(event) {
   const data = event.data || {};
 
   if (data.type === "status") {
-    setStatus(refs.runtimeStatus, data.message || "Loading Python runtime...", "loading");
+    refreshAppStatus();
     return;
   }
 
   if (data.type === "ready") {
     state.runtimeReady = true;
-    if (!state.isRunning) {
-      setStatus(refs.runtimeStatus, "Python runtime ready.", "ready");
-    }
+    refreshAppStatus();
     syncEditorButtons();
     return;
   }
@@ -706,7 +785,7 @@ function handleWorkerMessage(event) {
   if (data.type === "run-start") {
     state.isRunning = true;
     clearOutput();
-    setStatus(refs.runtimeStatus, "Running code...", "running");
+    refreshAppStatus();
     syncEditorButtons();
     return;
   }
@@ -718,7 +797,7 @@ function handleWorkerMessage(event) {
 
   if (data.type === "run-complete") {
     state.isRunning = false;
-    setStatus(refs.runtimeStatus, "Run finished.", "ready");
+    refreshAppStatus();
     syncEditorButtons();
     return;
   }
@@ -726,7 +805,7 @@ function handleWorkerMessage(event) {
   if (data.type === "run-error") {
     state.isRunning = false;
     appendRuntimeError(data.message || "An unknown runtime error occurred.");
-    setStatus(refs.runtimeStatus, "Run failed.", "error");
+    flashAppStatus("Check your code and try again.", "error", 2800);
     syncEditorButtons();
     return;
   }
@@ -734,8 +813,8 @@ function handleWorkerMessage(event) {
   if (data.type === "runtime-error") {
     state.runtimeReady = false;
     state.isRunning = false;
-    appendRuntimeError("Runtime error: " + (data.message || "Could not load Pyodide."));
-    setStatus(refs.runtimeStatus, "Python runtime could not load.", "error");
+    appendRuntimeError("Runner issue: " + (data.message || "Could not load the Python tools."));
+    flashAppStatus("Something needs attention.", "error", 3200);
     syncEditorButtons();
   }
 }
@@ -887,7 +966,7 @@ function createWorker() {
     state.runtimeReady = false;
     state.isRunning = false;
     appendRuntimeError("Worker error: " + event.message);
-    setStatus(refs.runtimeStatus, "Runtime worker crashed.", "error");
+    flashAppStatus("Something needs attention.", "error", 3200);
     syncEditorButtons();
   });
   state.worker.postMessage({ type: "init" });
@@ -897,7 +976,7 @@ function restartWorker(message) {
   terminateWorker();
   state.runtimeReady = false;
   state.isRunning = false;
-  setStatus(refs.runtimeStatus, message, "loading");
+  flashAppStatus(message, "loading", 1800);
   syncEditorButtons();
   createWorker();
 }
@@ -925,7 +1004,7 @@ function getSelectedIdentity() {
 }
 
 function formatLevelLabel(sourceKey, level) {
-  return sourceKey === "days100" && level === "God Level" ? "God Level · Phathu's Intelligence" : level;
+  return sourceKey === "days100" && level === "God Level" ? "God Level | Phathu's Intelligence" : level;
 }
 
 function pickSoloChallenge() {
@@ -970,13 +1049,23 @@ function maybeUseStarterCode() {
 
   setEditorValue(starterCode);
   storeDraft();
-  setStatus(refs.runtimeStatus, "Challenge starter code loaded into the editor.", "ready");
+  flashAppStatus("Starter code loaded.", "ready");
   window.setTimeout(() => state.editor.focus(), 220);
 }
 
 function toggleDetail(button, panel, showLabel, hideLabel) {
   panel.hidden = !panel.hidden;
   button.textContent = panel.hidden ? showLabel : hideLabel;
+}
+
+function toggleRoundHistory() {
+  state.roundHistoryOpen = !state.roundHistoryOpen;
+  setPanelState(refs.toggleRoundHistoryButton, refs.roundHistoryPanel, state.roundHistoryOpen, "Hide recent rounds", "Show recent rounds");
+}
+
+function toggleSoloPractice() {
+  state.soloPanelOpen = !state.soloPanelOpen;
+  setPanelState(refs.toggleSoloButton, refs.soloPracticePanel, state.soloPanelOpen, "Hide", "Open");
 }
 
 function formatTimestamp(timestamp) {
@@ -992,15 +1081,15 @@ function formatTimestamp(timestamp) {
 
 function formatRoomStatus(status) {
   if (status === "ready") {
-    return "Both players are connected and ready.";
+    return "Both players are here. Scores update live from this room.";
   }
   if (status === "challenge_active") {
-    return "Challenge active. Submit one answer only.";
+    return "Challenge live. Each person gets one answer.";
   }
   if (status === "round_complete") {
-    return "Round complete. Start the next challenge when ready.";
+    return "Round complete. Start another one when you are ready.";
   }
-  return "Waiting for both players to connect.";
+  return "Scores appear when both players are active together.";
 }
 
 function renderParticipantState(roomState) {
@@ -1016,11 +1105,11 @@ function renderParticipantState(roomState) {
   for (const participant of stateToRender.participants) {
     const chip = document.createElement("div");
     chip.className = "participant-chip " + participant.status;
-    chip.textContent = `${participant.identity}: ${participant.status === "open" ? "available" : participant.status}`;
+    chip.textContent = `${participant.identity} ${participant.status === "open" ? "available" : participant.status}`;
     refs.participantList.appendChild(chip);
   }
 
-  refs.roomHeadline.textContent = stateToRender.roomId ? `Room ${stateToRender.roomId}` : "No room joined";
+  refs.roomHeadline.textContent = stateToRender.roomId ? `Room ${stateToRender.roomId}` : "Not in a room";
 }
 
 function setIdentityAvailability(roomState) {
@@ -1043,7 +1132,7 @@ function renderChat(messages) {
   refs.chatMessages.innerHTML = "";
 
   if (!messages || !messages.length) {
-    refs.chatMessages.innerHTML = `<div class="message system">Room messages will appear here.</div>`;
+    refs.chatMessages.innerHTML = `<div class="message system">Messages between both players will appear here.</div>`;
     return;
   }
 
@@ -1064,73 +1153,11 @@ function renderChat(messages) {
   refs.chatMessages.scrollTop = refs.chatMessages.scrollHeight;
 }
 
-function renderLeaderboard(payload) {
-  state.leaderboard = payload?.entries || [];
-  refs.leaderboardBody.innerHTML = "";
-
-  if (!payload || !payload.enabled) {
-    setStatus(
-      refs.persistenceStatus,
-      payload?.error ? "SQLite storage unavailable." : "Leaderboard storage unavailable.",
-      "warning"
-    );
-    refs.leaderboardEmpty.classList.remove("hidden");
-    refs.leaderboardEmpty.textContent = payload?.error
-      ? payload.error
-      : "Leaderboard storage is not available yet.";
-    return;
-  }
-
-  state.persistenceBackend = payload.backend || "sqlite";
-  setStatus(refs.persistenceStatus, "SQLite leaderboard connected.", "ready");
-
-  if (!state.leaderboard.length) {
-    refs.leaderboardEmpty.classList.remove("hidden");
-    refs.leaderboardEmpty.textContent = "No persistent leaderboard entries yet. Finish a room round to create them.";
-    return;
-  }
-
-  refs.leaderboardEmpty.classList.add("hidden");
-
-  for (const entry of state.leaderboard) {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${entry.identity}</td>
-      <td>${entry.totalPoints || 0}</td>
-      <td>${entry.totalCorrectAnswers || 0}</td>
-      <td>${entry.totalChallengesAttempted || 0}</td>
-      <td>${entry.totalWins || 0}</td>
-      <td>${entry.bestWinStreak || 0}</td>
-    `;
-    refs.leaderboardBody.appendChild(row);
-  }
-}
-
-function syncPersistenceStatus(payload) {
-  if (!payload) {
-    setStatus(refs.persistenceStatus, "Checking SQLite storage...", "loading");
-    return;
-  }
-
-  const backend = payload.persistenceBackend || payload.backend || state.persistenceBackend || "sqlite";
-  const backendLabel = backend === "sqlite" ? "SQLite" : "Storage";
-  state.persistenceBackend = backend;
-
-  if (payload.persistenceEnabled || payload.enabled) {
-    setStatus(refs.persistenceStatus, `${backendLabel} leaderboard connected.`, "ready");
-    return;
-  }
-
-  setStatus(refs.persistenceStatus, `${backendLabel} storage unavailable.`, "warning");
-  refs.leaderboardEmpty.classList.remove("hidden");
-  refs.leaderboardEmpty.textContent = payload.persistenceError || payload.error || `${backendLabel} storage is not available yet.`;
-}
-
 function renderRoundHistory(history) {
   refs.roundHistoryList.innerHTML = "";
 
   if (!history || !history.length) {
-    refs.roundHistoryList.innerHTML = `<div class="history-item">No room rounds completed yet.</div>`;
+    refs.roundHistoryList.innerHTML = `<div class="history-item">No rounds yet.</div>`;
     return;
   }
 
@@ -1160,9 +1187,9 @@ function renderRoomChallenge(roomState) {
   refs.startChallengeButton.disabled = !(state.roomSession && roomState && roomState.roomStatus !== "challenge_active" && roomState.participants.every((item) => item.status === "connected"));
 
   if (!active) {
-    refs.challengePhasePill.textContent = "Waiting for players";
+    refs.challengePhasePill.textContent = "Waiting";
     refs.roomChallengeTitle.textContent = "No live challenge yet";
-    refs.roomChallengeMeta.textContent = "Join a room with both Angel and Beloved connected to begin.";
+    refs.roomChallengeMeta.textContent = "Join a room with both people connected to begin.";
     refs.roomChallengePrompt.textContent = "";
     refs.roomChallengeCode.hidden = true;
     refs.roomChallengeChoices.innerHTML = "";
@@ -1170,9 +1197,9 @@ function renderRoomChallenge(roomState) {
     return;
   }
 
-  refs.challengePhasePill.textContent = active.status === "active" ? "Challenge Active" : "Round Complete";
+  refs.challengePhasePill.textContent = active.status === "active" ? "Live now" : "Round done";
   refs.roomChallengeTitle.textContent = active.challenge.title;
-  refs.roomChallengeMeta.textContent = `${active.challenge.type} | ${active.challenge.difficulty} | ${active.challenge.points} pts`;
+  refs.roomChallengeMeta.textContent = `${active.challenge.difficulty} challenge | ${active.challenge.points} pts`;
   refs.roomChallengePrompt.textContent = active.challenge.prompt;
 
   if (active.challenge.code) {
@@ -1194,7 +1221,7 @@ function renderRoomChallenge(roomState) {
 
   if (active.status === "active") {
     refs.challengeResultSummary.textContent = mySubmission?.submitted
-      ? `${myIdentity} has already submitted for this round. Waiting for the other player or round completion.`
+      ? `${myIdentity} already submitted. Waiting for the other player or the round result.`
       : "Both players receive the same challenge. Submit once to lock in your answer.";
     refs.challengeAnswerInput.placeholder = active.challenge.answerPlaceholder || "Type your answer.";
     refs.challengeAnswerInput.disabled = !state.roomSession || mySubmission?.submitted;
@@ -1215,20 +1242,26 @@ function renderRoomState(roomState) {
   state.previewState = roomState;
   renderParticipantState(roomState);
   setIdentityAvailability(roomState);
+  refs.sessionScorePanel.hidden = !shouldShowSessionScore(roomState);
   refs.sessionAngelPoints.textContent = roomState?.sessionScores?.Angel ?? 0;
   refs.sessionBelovedPoints.textContent = roomState?.sessionScores?.Beloved ?? 0;
   refs.sessionRoundStatus.textContent = formatRoomStatus(roomState?.roomStatus);
   refs.leaveRoomButton.disabled = !state.roomSession;
   refs.sendChatButton.disabled = !state.roomSession;
   refs.chatInput.disabled = !state.roomSession;
-  refs.roomNotice.textContent = roomState.roomFull && !state.roomSession
-    ? `${roomState.roomId} is full.`
-    : roomState.availableIdentities.length
-      ? `Available identities: ${roomState.availableIdentities.join(", ")}`
-      : "Both identities are currently occupied.";
+  refs.roomNotice.textContent = roomState.roomStatus === "challenge_active"
+    ? "Challenge live. Submit one answer when you're ready."
+    : isLiveRoomConnected(roomState)
+      ? "Both players are here. You can start a challenge."
+      : roomState.roomFull && !state.roomSession
+        ? `${roomState.roomId} is full.`
+        : roomState.availableIdentities.length
+          ? `Available: ${roomState.availableIdentities.join(", ")}`
+          : "Both names are currently in use.";
   renderRoomChallenge(roomState);
   renderChat(roomState.chat || []);
   renderRoundHistory(roomState.roundHistory || []);
+  refreshAppStatus();
 }
 
 function emitWithAck(eventName, payload = {}) {
@@ -1236,13 +1269,13 @@ function emitWithAck(eventName, payload = {}) {
     if (!state.socket || !state.socket.connected) {
       resolve({
         ok: false,
-        message: "Room server is offline right now."
+        message: "The live room is offline right now."
       });
       return;
     }
 
     state.socket.emit(eventName, payload, (response) => {
-      resolve(response || { ok: false, message: "No response from server." });
+      resolve(response || { ok: false, message: "The live room did not reply." });
     });
   });
 }
@@ -1251,7 +1284,7 @@ async function previewRoom() {
   const result = await emitWithAck("room:preview", { roomId: refs.roomCodeInput.value.trim() });
 
   if (!result.ok) {
-    refs.roomNotice.textContent = result.message || "Could not preview the room.";
+    refs.roomNotice.textContent = result.message || "Could not preview the room right now.";
     return;
   }
 
@@ -1268,7 +1301,7 @@ async function joinRoom({ auto = false } = {}) {
   });
 
   if (!result.ok) {
-    refs.roomNotice.textContent = result.message || "Could not join the room.";
+    refs.roomNotice.textContent = result.message || "Could not join the room right now.";
     if (result.state) {
       renderRoomState(result.state);
     }
@@ -1278,7 +1311,7 @@ async function joinRoom({ auto = false } = {}) {
   saveRoomSession(result.roomId, identity);
   refs.roomCodeInput.value = result.roomId;
   renderRoomState(result.state);
-  refs.roomNotice.textContent = `${identity} joined room ${result.roomId}.`;
+  refs.roomNotice.textContent = `You joined ${result.roomId} as ${identity}.`;
 }
 
 async function leaveRoom() {
@@ -1312,7 +1345,7 @@ async function sendChatMessage() {
   const result = await emitWithAck("chat:send", { text });
 
   if (!result.ok) {
-    refs.roomNotice.textContent = result.message || "Message could not be sent.";
+    refs.roomNotice.textContent = result.message || "Message could not be sent right now.";
     return;
   }
 
@@ -1352,8 +1385,8 @@ function bootSocket() {
   });
 
   state.socket.on("connect", async () => {
-    setStatus(refs.socketStatus, "Room server connected.", "ready");
-    state.socket.emit("leaderboard:request");
+    state.socketConnected = true;
+    refreshAppStatus();
     if (state.roomSession) {
       refs.roomCodeInput.value = state.roomSession.roomId;
       const identityInput = document.querySelector(`input[name="identity"][value="${state.roomSession.identity}"]`);
@@ -1367,17 +1400,13 @@ function bootSocket() {
   });
 
   state.socket.on("disconnect", () => {
-    setStatus(refs.socketStatus, "Room server disconnected. Trying to reconnect...", "warning");
-    setStatus(refs.persistenceStatus, "SQLite leaderboard waiting for server...", "warning");
+    state.socketConnected = false;
+    refreshAppStatus();
   });
 
   state.socket.on("socket:status", (payload) => {
-    setStatus(refs.socketStatus, payload.connected ? "Room server connected." : "Room server offline.", payload.connected ? "ready" : "error");
-    syncPersistenceStatus(payload);
-  });
-
-  state.socket.on("leaderboard:update", (payload) => {
-    renderLeaderboard(payload);
+    state.socketConnected = Boolean(payload.connected);
+    refreshAppStatus();
   });
 
   state.socket.on("room:state", (roomState) => {
@@ -1389,13 +1418,13 @@ function bindEvents() {
   refs.runButton.addEventListener("click", runCode);
   refs.stopButton.addEventListener("click", () => {
     if (state.isRunning) {
-      restartWorker("Execution stopped. Reloading runtime...");
+      restartWorker("Stopping...");
     }
   });
   refs.clearOutputButton.addEventListener("click", () => {
     clearOutput();
     if (!state.isRunning) {
-      setStatus(refs.runtimeStatus, state.runtimeReady ? "Output cleared." : "Loading Python runtime...", state.runtimeReady ? "ready" : "loading");
+      flashAppStatus("Output cleared.", state.runtimeReady ? "ready" : "loading");
     }
   });
   refs.resetCodeButton.addEventListener("click", resetExample);
@@ -1408,6 +1437,8 @@ function bindEvents() {
   refs.useStarterButton.addEventListener("click", maybeUseStarterCode);
   refs.toggleHintButton.addEventListener("click", () => toggleDetail(refs.toggleHintButton, refs.challengeHint, "Reveal Hint", "Hide Hint"));
   refs.toggleSolutionButton.addEventListener("click", () => toggleDetail(refs.toggleSolutionButton, refs.challengeSolution, "Reveal Solution Idea", "Hide Solution Idea"));
+  refs.toggleRoundHistoryButton.addEventListener("click", toggleRoundHistory);
+  refs.toggleSoloButton.addEventListener("click", toggleSoloPractice);
   refs.checkRoomButton.addEventListener("click", previewRoom);
   refs.joinRoomButton.addEventListener("click", () => joinRoom());
   refs.leaveRoomButton.addEventListener("click", leaveRoom);
@@ -1422,7 +1453,10 @@ createWorker();
 bootSocket();
 bindEvents();
 syncEditorButtons();
+setPanelState(refs.toggleRoundHistoryButton, refs.roundHistoryPanel, state.roundHistoryOpen, "Hide recent rounds", "Show recent rounds");
+setPanelState(refs.toggleSoloButton, refs.soloPracticePanel, state.soloPanelOpen, "Hide", "Open");
 renderParticipantState(null);
 setIdentityAvailability(null);
 renderChat([]);
 renderRoundHistory([]);
+refreshAppStatus();
