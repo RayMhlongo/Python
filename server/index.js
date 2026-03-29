@@ -12,7 +12,12 @@ const ASSET_DIR = path.join(ROOT_DIR, "assets");
 const manager = new RoomManager();
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: true,
+    methods: ["GET", "POST"]
+  }
+});
 const roomSweepInterval = setInterval(() => {
   const changedRooms = manager.sweepExpired();
   changedRooms.forEach((roomId) => {

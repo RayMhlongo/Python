@@ -12,6 +12,7 @@
     createStatusController,
     getQueryParam,
     safeStorageGet,
+    safeStorageRemove,
     safeStorageSet
   } = shared;
 
@@ -19,6 +20,12 @@
 
   const refs = {
     pageStatus: document.getElementById("pageStatus"),
+    practiceChallengeCard: document.getElementById("practiceChallengeCard"),
+    practiceChallengeTitle: document.getElementById("practiceChallengeTitle"),
+    practiceChallengeDescription: document.getElementById("practiceChallengeDescription"),
+    practiceChallengeSource: document.getElementById("practiceChallengeSource"),
+    practiceChallengeLevel: document.getElementById("practiceChallengeLevel"),
+    clearPracticeChallengeButton: document.getElementById("clearPracticeChallengeButton"),
     codeEditor: document.getElementById("codeEditor"),
     programInput: document.getElementById("programInput"),
     outputConsole: document.getElementById("outputConsole"),
@@ -97,6 +104,42 @@
 
   function updateLoadButtonState() {
     refs.loadCodeButton.disabled = safeStorageGet(STORAGE_KEYS.savedCode) === null;
+  }
+
+  function renderPracticeChallengeContext() {
+    if (!refs.practiceChallengeCard) {
+      return;
+    }
+
+    const raw = safeStorageGet(STORAGE_KEYS.practiceChallengeContext);
+
+    if (!raw) {
+      refs.practiceChallengeCard.hidden = true;
+      return;
+    }
+
+    try {
+      const context = JSON.parse(raw);
+
+      if (!context || !context.title) {
+        refs.practiceChallengeCard.hidden = true;
+        return;
+      }
+
+      refs.practiceChallengeTitle.textContent = context.title;
+      refs.practiceChallengeDescription.textContent = context.description || "";
+      refs.practiceChallengeSource.textContent = context.sourceLabel || "Solo Challenge";
+      refs.practiceChallengeLevel.textContent = context.levelLabel || "Practice";
+      refs.practiceChallengeCard.hidden = false;
+    } catch (_error) {
+      refs.practiceChallengeCard.hidden = true;
+    }
+  }
+
+  function clearPracticeChallengeContext() {
+    safeStorageRemove(STORAGE_KEYS.practiceChallengeContext);
+    renderPracticeChallengeContext();
+    status.flash("Challenge focus cleared.", "ready");
   }
 
   function storeDraft() {
@@ -455,6 +498,7 @@
   refs.saveCodeButton.addEventListener("click", saveLocally);
   refs.loadCodeButton.addEventListener("click", loadSaved);
   refs.programInput.addEventListener("input", storeDraft);
+  refs.clearPracticeChallengeButton?.addEventListener("click", clearPracticeChallengeContext);
   window.addEventListener("pyte:theme", () => {
     if (state.editor && typeof state.editor.setOption === "function") {
       state.editor.setOption("theme", currentEditorTheme());
@@ -462,6 +506,7 @@
     }
   });
 
+  renderPracticeChallengeContext();
   initializeEditor();
   createWorker();
   syncButtons();

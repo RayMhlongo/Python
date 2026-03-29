@@ -6,7 +6,12 @@
     draftInput: "pyte.draft.input.v1",
     roomSession: "pyte.room.session.v1",
     clientToken: "pyte.room.client-token.v1",
-    themeMode: "pyte.theme.mode.v1"
+    themeMode: "pyte.theme.mode.v1",
+    roomServerUrl: "pyte.room.server-url.v1",
+    soloPreferences: "pyte.solo.preferences.v1",
+    soloProgress: "pyte.solo.progress.v1",
+    soloCurrentChallenge: "pyte.solo.current-challenge.v1",
+    practiceChallengeContext: "pyte.practice.challenge-context.v1"
   };
 
   const DEFAULT_CODE = `print("Welcome to Phathu and Ray's Pyte environment")
@@ -81,6 +86,75 @@ else:
 
   function clearRoomSession() {
     safeStorageRemove(STORAGE_KEYS.roomSession);
+  }
+
+  function getDefaultRoomServerUrl() {
+    if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+      return window.location.origin;
+    }
+
+    return "";
+  }
+
+  function normalizeRoomServerUrl(value) {
+    let nextValue = String(value || "").trim();
+
+    if (!nextValue) {
+      return getDefaultRoomServerUrl();
+    }
+
+    if (!/^https?:\/\//i.test(nextValue) && (window.location.protocol === "http:" || window.location.protocol === "https:")) {
+      nextValue = `${window.location.protocol}//${nextValue}`;
+    }
+
+    try {
+      return new URL(nextValue).origin.replace(/\/+$/, "");
+    } catch (_error) {
+      return "";
+    }
+  }
+
+  function loadRoomServerUrl() {
+    const queryValue = getQueryParam("server") || getQueryParam("backend");
+    const storedValue = queryValue || safeStorageGet(STORAGE_KEYS.roomServerUrl);
+    const normalized = normalizeRoomServerUrl(storedValue);
+
+    if (queryValue && normalized) {
+      safeStorageSet(STORAGE_KEYS.roomServerUrl, normalized);
+    }
+
+    return normalized || getDefaultRoomServerUrl();
+  }
+
+  function saveRoomServerUrl(value) {
+    const normalized = normalizeRoomServerUrl(value);
+
+    if (normalized) {
+      safeStorageSet(STORAGE_KEYS.roomServerUrl, normalized);
+      return normalized;
+    }
+
+    safeStorageRemove(STORAGE_KEYS.roomServerUrl);
+    return getDefaultRoomServerUrl();
+  }
+
+  async function copyText(value) {
+    const text = String(value || "");
+
+    if (!text) {
+      return false;
+    }
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (_error) {
+      return false;
+    }
+
+    return false;
   }
 
   function setStatus(element, message, mode) {
@@ -198,14 +272,19 @@ else:
     STORAGE_KEYS,
     applyTheme,
     clearRoomSession,
+    copyText,
     createStatusController,
+    getDefaultRoomServerUrl,
     getClientToken,
     getQueryParam,
     loadRoomSession,
+    loadRoomServerUrl,
+    normalizeRoomServerUrl,
     safeStorageGet,
     safeStorageRemove,
     safeStorageSet,
     saveRoomSession,
+    saveRoomServerUrl,
     setPanelState,
     setStatus
   };

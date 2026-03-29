@@ -25,6 +25,8 @@ This repo now includes a `Dockerfile`, so Railway can build and run it directly 
 
 The server already respects Railway's `PORT` and serves the frontend together with the live room backend.
 
+If the frontend is hosted separately from the Node server, open the `Live Room` page and paste the backend URL into `Room Server` once. The page now remembers that server address and can also build shareable invite links that include the room code and backend host.
+
 ## Environment variables
 
 - `PORT`

@@ -69,6 +69,25 @@
                 <input id="roomCodeInput" class="text-input" maxlength="24" placeholder="Example: PYTE-ROSE" autocomplete="off">
               </div>
               <div class="field">
+                <label for="roomServerInput">Room Server</label>
+                <p class="field-copy">
+                  Leave this on the current site when the room runs here. If the frontend is hosted separately, paste your live backend URL once.
+                </p>
+                <input
+                  id="roomServerInput"
+                  class="text-input"
+                  inputmode="url"
+                  autocomplete="off"
+                  spellcheck="false"
+                  placeholder="Example: https://your-room-server.onrender.com"
+                >
+              </div>
+              <div class="button-row">
+                <button class="button button-soft" id="connectRoomServerButton" type="button">Connect Server</button>
+                <button class="button button-soft" id="useSameSiteButton" type="button">Use This Site</button>
+                <button class="button button-soft" id="copyInviteButton" type="button">Copy Invite Link</button>
+              </div>
+              <div class="field">
                 <label>Choose Your Name</label>
                 <div class="identity-grid">
                   <label class="identity-option" id="identityOptionAngel">
@@ -185,7 +204,7 @@
     </div>
   </noscript>
 
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
   <script src="./assets/app.js"></script>
   <script src="./assets/room-page.js"></script>
 </body>

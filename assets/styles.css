@@ -409,6 +409,10 @@ html[data-theme="angel"] .summary-line {
   background: rgba(255, 247, 251, 0.74);
 }
 
+.focus-card .card-head {
+  align-items: center;
+}
+
 .card {
   overflow: hidden;
   border-radius: var(--radius-xl);
@@ -467,6 +471,35 @@ html[data-theme="angel"] .summary-line {
 
 .page-grid {
   align-items: start;
+}
+
+.stat-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.stat-card {
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--stroke);
+  background: rgba(8, 15, 31, 0.7);
+}
+
+html[data-theme="angel"] .stat-card {
+  background: rgba(255, 249, 252, 0.84);
+}
+
+.stat-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.stat-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.4rem;
 }
 
 .practice-layout {
@@ -975,6 +1008,10 @@ html[data-theme="angel"] .console:empty::before {
   }
 
   .two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-grid {
     grid-template-columns: 1fr;
   }
 

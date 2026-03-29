@@ -7,10 +7,16 @@
 
   const {
     clearRoomSession,
+    copyText,
     createStatusController,
+    getDefaultRoomServerUrl,
     getClientToken,
+    getQueryParam,
     loadRoomSession,
+    loadRoomServerUrl,
+    normalizeRoomServerUrl,
     saveRoomSession,
+    saveRoomServerUrl,
     setPanelState
   } = shared;
 
@@ -18,6 +24,10 @@
     pageStatus: document.getElementById("pageStatus"),
     roomHeadline: document.getElementById("roomHeadline"),
     roomCodeInput: document.getElementById("roomCodeInput"),
+    roomServerInput: document.getElementById("roomServerInput"),
+    connectRoomServerButton: document.getElementById("connectRoomServerButton"),
+    useSameSiteButton: document.getElementById("useSameSiteButton"),
+    copyInviteButton: document.getElementById("copyInviteButton"),
     checkRoomButton: document.getElementById("checkRoomButton"),
     joinRoomButton: document.getElementById("joinRoomButton"),
     leaveRoomButton: document.getElementById("leaveRoomButton"),
@@ -50,6 +60,7 @@
   const state = {
     socket: null,
     socketPhase: typeof window.io === "function" ? "connecting" : "offline",
+    socketUrl: loadRoomServerUrl(),
     roomSession: loadRoomSession(),
     currentRoomState: null,
     roundHistoryOpen: false,
@@ -71,6 +82,10 @@
 
     return { message: "Ready", mode: "ready" };
   });
+
+  function activeRoomId() {
+    return String(refs.roomCodeInput.value || "").trim().toUpperCase();
+  }
 
   function emptyRoomState(roomId = "") {
     return {
@@ -349,15 +364,18 @@
     const inRoom = Boolean(state.roomSession);
     const connected = state.socketPhase === "connected";
     refs.roomCodeInput.disabled = inRoom;
-    refs.checkRoomButton.disabled = inRoom || !connected;
-    refs.joinRoomButton.disabled = inRoom || !connected;
+    refs.checkRoomButton.disabled = !connected;
+    refs.joinRoomButton.disabled = !connected || !activeRoomId() || inRoom;
     refs.leaveRoomButton.disabled = !inRoom;
     refs.chatInput.disabled = !inRoom;
     refs.sendChatButton.disabled = !inRoom;
+    refs.connectRoomServerButton.disabled = false;
+    refs.useSameSiteButton.disabled = false;
+    refs.copyInviteButton.disabled = !activeRoomId();
   }
 
   function renderRoomState(roomState) {
-    const nextRoom = roomState || emptyRoomState(refs.roomCodeInput.value.trim().toUpperCase());
+    const nextRoom = roomState || emptyRoomState(activeRoomId());
     state.currentRoomState = nextRoom;
     renderParticipants(nextRoom);
     setIdentityAvailability(nextRoom);
@@ -381,6 +399,10 @@
     status.render();
   }
 
+  function setRoomServerInputValue(value) {
+    refs.roomServerInput.value = value === getDefaultRoomServerUrl() ? "" : value;
+  }
+
   function emitWithAck(eventName, payload = {}) {
     return new Promise((resolve) => {
       if (!state.socket || state.socketPhase !== "connected") {
@@ -399,7 +421,7 @@
 
   async function previewRoom() {
     const result = await emitWithAck("room:preview", {
-      roomId: refs.roomCodeInput.value.trim()
+      roomId: activeRoomId()
     });
 
     if (!result.ok) {
@@ -412,7 +434,7 @@
   }
 
   async function joinRoom(options = {}) {
-    const roomId = refs.roomCodeInput.value.trim();
+    const roomId = activeRoomId();
     const identity = options.auto && state.roomSession ? state.roomSession.identity : getSelectedIdentity();
     const result = await emitWithAck("room:join", {
       roomId,
@@ -441,7 +463,7 @@
     state.roomSession = null;
     refs.chatInput.value = "";
     refs.challengeAnswerInput.value = "";
-    renderRoomState(emptyRoomState(refs.roomCodeInput.value.trim().toUpperCase()));
+    renderRoomState(emptyRoomState(activeRoomId()));
     refs.roomNotice.textContent = "You left the room.";
     status.flash("Left room.", "ready");
   }
@@ -509,17 +531,82 @@
     );
   }
 
+  function closeSocket() {
+    if (!state.socket) {
+      return;
+    }
+
+    state.socket.removeAllListeners();
+    state.socket.disconnect();
+    state.socket = null;
+  }
+
+  function resetRoomSurface(message) {
+    if (state.roomSession) {
+      clearRoomSession();
+      state.roomSession = null;
+    }
+
+    renderRoomState(emptyRoomState(activeRoomId()));
+    if (message) {
+      refs.roomNotice.textContent = message;
+    }
+  }
+
+  async function connectRoomServer(options = {}) {
+    const normalized = saveRoomServerUrl(refs.roomServerInput.value);
+    state.socketUrl = normalized;
+    setRoomServerInputValue(normalized);
+
+    if (options.resetSession) {
+      resetRoomSurface("Room connection changed. Join again when you're ready.");
+    }
+
+    closeSocket();
+    state.socketPhase = "connecting";
+    status.render();
+    bootSocket();
+  }
+
+  async function useSameSiteServer() {
+    refs.roomServerInput.value = "";
+    await connectRoomServer({ resetSession: true });
+    status.flash("Using this site for the live room.", "ready");
+  }
+
+  async function copyInviteLink() {
+    const roomId = activeRoomId();
+
+    if (!roomId) {
+      status.flash("Add a room code first.", "warning");
+      return;
+    }
+
+    const inviteUrl = new URL("./room.html", window.location.href);
+    inviteUrl.searchParams.set("room", roomId);
+
+    if (state.socketUrl && state.socketUrl !== window.location.origin) {
+      inviteUrl.searchParams.set("server", state.socketUrl);
+    }
+
+    const copied = await copyText(inviteUrl.toString());
+    status.flash(copied ? "Invite link copied." : "Could not copy the invite link.", copied ? "ready" : "warning");
+  }
+
   function bootSocket() {
     if (typeof window.io !== "function") {
       state.socketPhase = "offline";
       refs.roomNotice.textContent = "Live room is unavailable right now, but the practice and solo pages still work.";
-      renderRoomState(emptyRoomState(refs.roomCodeInput.value.trim().toUpperCase()));
+      renderRoomState(emptyRoomState(activeRoomId()));
       return;
     }
 
-    state.socket = window.io({
+    const socketOrigin = state.socketUrl || getDefaultRoomServerUrl();
+
+    state.socket = window.io(socketOrigin, {
       transports: ["websocket", "polling"],
-      reconnection: true
+      reconnection: true,
+      timeout: 12000
     });
 
     state.socket.on("connect", async () => {
@@ -538,7 +625,7 @@
         return;
       }
 
-      if (refs.roomCodeInput.value.trim()) {
+      if (activeRoomId()) {
         await previewRoom();
         return;
       }
@@ -554,7 +641,7 @@
 
     state.socket.on("connect_error", () => {
       state.socketPhase = "offline";
-      refs.roomNotice.textContent = "Room connection is unavailable right now. Try again in a moment.";
+      refs.roomNotice.textContent = `Room connection is unavailable right now. Check the Room Server and try again.`;
       status.render();
       syncRoomControls();
     });
@@ -572,16 +659,32 @@
   refs.checkRoomButton.addEventListener("click", previewRoom);
   refs.joinRoomButton.addEventListener("click", () => joinRoom());
   refs.leaveRoomButton.addEventListener("click", leaveRoom);
+  refs.connectRoomServerButton.addEventListener("click", () => connectRoomServer({ resetSession: true }));
+  refs.useSameSiteButton.addEventListener("click", useSameSiteServer);
+  refs.copyInviteButton.addEventListener("click", copyInviteLink);
   refs.sendChatButton.addEventListener("click", sendChatMessage);
   refs.startChallengeButton.addEventListener("click", startChallenge);
   refs.submitChallengeAnswerButton.addEventListener("click", submitChallengeAnswer);
   refs.toggleRoundHistoryButton.addEventListener("click", toggleRoundHistory);
+  refs.roomCodeInput.addEventListener("input", syncRoomControls);
+  refs.roomServerInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      connectRoomServer({ resetSession: true });
+    }
+  });
   refs.chatInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       sendChatMessage();
     }
   });
+
+  const queryRoom = getQueryParam("room");
+  if (queryRoom) {
+    refs.roomCodeInput.value = queryRoom.trim().toUpperCase();
+  }
+  setRoomServerInputValue(state.socketUrl);
 
   setPanelState(
     refs.toggleRoundHistoryButton,

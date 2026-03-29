@@ -85,7 +85,24 @@
             <div class="button-row">
               <button class="button button-warning" id="newChallengeButton" type="button">New Challenge</button>
               <button class="button button-accent" id="useStarterButton" type="button">Use Starter Code</button>
+              <button class="button button-soft" id="copyChallengeButton" type="button">Copy Prompt</button>
+              <button class="button button-soft" id="markCompleteButton" type="button">Mark Complete</button>
             </div>
+            <div class="stat-grid">
+              <div class="stat-card">
+                <span class="stat-label">Seen</span>
+                <strong id="soloSeenCount">0</strong>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Completed</span>
+                <strong id="soloCompletedCount">0</strong>
+              </div>
+              <div class="stat-card">
+                <span class="stat-label">Current Pool</span>
+                <strong id="soloPoolCount">0</strong>
+              </div>
+            </div>
+            <div class="notice-card" id="soloActionNote">Pick a challenge to start a focused practice round.</div>
           </div>
         </article>
 
@@ -107,9 +124,12 @@
             <div class="button-row">
               <button class="button button-soft" id="toggleHintButton" type="button" aria-expanded="false">Reveal Hint</button>
               <button class="button button-soft" id="toggleSolutionButton" type="button" aria-expanded="false">Reveal Solution Idea</button>
+              <button class="button button-soft" id="toggleStarterPreviewButton" type="button" aria-expanded="false">Preview Starter Code</button>
             </div>
             <div class="notice-card" id="challengeHint" hidden></div>
             <div class="notice-card" id="challengeSolution" hidden></div>
+            <pre class="challenge-code" id="challengeStarterPreview" hidden></pre>
+            <div class="subtle-line" id="challengePersistenceNote">Your current prompt and progress stay on this device.</div>
           </div>
         </article>
       </section>
