@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Live Room | Phathu and Ray's Pyte environment</title>
+  <meta
+    name="description"
+    content="Join a shared Python practice room as Angel or Beloved, chat live, and compete in synchronized challenge rounds."
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body data-page="room">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark">Pyte</span>
+        <span class="brand-copy">Phathu and Ray's Pyte environment</span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="./index.html" data-nav-key="home">Home</a>
+        <a href="./practice.html" data-nav-key="practice">Practice</a>
+        <a href="./room.html" data-nav-key="room">Live Room</a>
+        <a href="./solo.html" data-nav-key="solo">Solo Challenges</a>
+      </nav>
+      <div class="toolbar">
+        <div class="theme-switch" aria-label="Theme switcher">
+          <button class="theme-button" type="button" data-theme-choice="beloved" aria-pressed="true">Beloved</button>
+          <button class="theme-button" type="button" data-theme-choice="angel" aria-pressed="false">Angel</button>
+        </div>
+        <div class="status-pill" id="pageStatus" data-state="loading">Connecting...</div>
+      </div>
+    </header>
+
+    <main class="page-stack">
+      <section class="hero hero-compact">
+        <div class="hero-copy">
+          <span class="eyebrow">Shared practice room</span>
+          <h1>Join the same room and practice live together</h1>
+          <p>
+            Lock in Angel or Beloved, preview who is free, chat in real time, and race through the same challenge prompt side by side.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <a class="button button-soft" href="./practice.html">Open Practice</a>
+          <a class="button button-accent" href="./solo.html">Open Solo Challenges</a>
+        </div>
+      </section>
+
+      <section class="page-grid room-layout">
+        <div class="stack-tight">
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Join Practice Room</h2>
+                <p class="card-copy">Pick a room code, choose your name, and connect when the seat is open.</p>
+              </div>
+              <span class="mini-pill" id="roomHeadline">Not in a room</span>
+            </div>
+            <div class="card-body stack-tight">
+              <div class="field">
+                <label for="roomCodeInput">Room Code</label>
+                <input id="roomCodeInput" class="text-input" maxlength="24" placeholder="Example: PYTE-ROSE" autocomplete="off">
+              </div>
+              <div class="field">
+                <label>Choose Your Name</label>
+                <div class="identity-grid">
+                  <label class="identity-option" id="identityOptionAngel">
+                    <input type="radio" name="identity" value="Angel" checked>
+                    <span>Angel</span>
+                  </label>
+                  <label class="identity-option" id="identityOptionBeloved">
+                    <input type="radio" name="identity" value="Beloved">
+                    <span>Beloved</span>
+                  </label>
+                </div>
+              </div>
+              <div class="button-row">
+                <button class="button button-soft" id="checkRoomButton" type="button">Preview Room</button>
+                <button class="button button-accent" id="joinRoomButton" type="button">Join Room</button>
+                <button class="button button-secondary" id="leaveRoomButton" type="button" disabled>Leave</button>
+              </div>
+              <div class="notice-card" id="roomNotice">Enter a room code to check who is available.</div>
+              <div class="subpanel">
+                <div class="subpanel-title">Room Status</div>
+                <div class="participant-list" id="participantList"></div>
+              </div>
+              <div class="subpanel" id="sessionScorePanel" hidden>
+                <div class="subpanel-title">Live Session Score</div>
+                <div class="score-grid">
+                  <div class="score-box score-box-angel">
+                    <span class="score-name">Angel</span>
+                    <strong id="sessionAngelPoints">0</strong>
+                  </div>
+                  <div class="score-box score-box-beloved">
+                    <span class="score-name">Beloved</span>
+                    <strong id="sessionBelovedPoints">0</strong>
+                  </div>
+                </div>
+                <div class="subtle-line" id="sessionRoundStatus">Points appear once both players are active together.</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Shared Challenge</h2>
+                <p class="card-copy">Both players receive the same prompt and answer once per round.</p>
+              </div>
+              <span class="mini-pill" id="challengePhasePill">Waiting</span>
+            </div>
+            <div class="card-body stack-tight">
+              <div class="button-row">
+                <button class="button button-warning" id="startChallengeButton" type="button" disabled>Start Challenge</button>
+              </div>
+              <div class="subpanel challenge-panel">
+                <div class="subpanel-title" id="roomChallengeTitle">No live challenge yet</div>
+                <div class="subtle-line" id="roomChallengeMeta">Both players need to be connected before a round can begin.</div>
+                <p class="challenge-text" id="roomChallengePrompt"></p>
+                <pre class="challenge-code" id="roomChallengeCode" hidden></pre>
+                <div class="choice-list" id="roomChallengeChoices"></div>
+                <div class="field">
+                  <label for="challengeAnswerInput">Your Answer</label>
+                  <textarea
+                    id="challengeAnswerInput"
+                    class="input-box short"
+                    placeholder="Type your answer here."
+                    spellcheck="false"
+                  ></textarea>
+                </div>
+                <div class="button-row">
+                  <button class="button button-accent" id="submitChallengeAnswerButton" type="button" disabled>Submit Answer</button>
+                </div>
+                <div class="notice-card" id="challengeResultSummary">Challenge results will appear here after the round ends.</div>
+              </div>
+              <div class="card-toggle-row">
+                <button class="toggle-chip" id="toggleRoundHistoryButton" type="button" aria-expanded="false">Show recent rounds</button>
+              </div>
+              <div class="subpanel" id="roundHistoryPanel" hidden>
+                <div class="subpanel-title">Recent Rounds</div>
+                <div class="round-history" id="roundHistoryList"></div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <article class="card chat-card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">Live Chat</h2>
+              <p class="card-copy">Keep the conversation close while you practice and race.</p>
+            </div>
+          </div>
+          <div class="card-body stack-tight">
+            <div class="chat-panel" id="chatMessages"></div>
+            <div class="chat-composer">
+              <textarea
+                id="chatInput"
+                class="input-box short"
+                placeholder="Type a message..."
+                spellcheck="false"
+              ></textarea>
+              <button class="button button-accent" id="sendChatButton" type="button" disabled>Send</button>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <noscript>
+    <div class="site-shell">
+      <div class="card">
+        <div class="card-body">
+          JavaScript is required for the live room, chat, and shared challenge flow.
+        </div>
+      </div>
+    </div>
+  </noscript>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="./assets/app.js"></script>
+  <script src="./assets/room-page.js"></script>
+</body>
+</html>

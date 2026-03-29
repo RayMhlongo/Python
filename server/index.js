@@ -23,12 +23,40 @@ let shuttingDown = false;
 
 app.use("/assets", express.static(ASSET_DIR));
 
+function sendPage(response, pageName) {
+  response.sendFile(path.join(ROOT_DIR, pageName));
+}
+
 app.get("/", (_request, response) => {
-  response.sendFile(path.join(ROOT_DIR, "index.html"));
+  sendPage(response, "index.html");
 });
 
 app.get("/index.html", (_request, response) => {
-  response.sendFile(path.join(ROOT_DIR, "index.html"));
+  sendPage(response, "index.html");
+});
+
+app.get("/practice", (_request, response) => {
+  sendPage(response, "practice.html");
+});
+
+app.get("/practice.html", (_request, response) => {
+  sendPage(response, "practice.html");
+});
+
+app.get("/room", (_request, response) => {
+  sendPage(response, "room.html");
+});
+
+app.get("/room.html", (_request, response) => {
+  sendPage(response, "room.html");
+});
+
+app.get("/solo", (_request, response) => {
+  sendPage(response, "solo.html");
+});
+
+app.get("/solo.html", (_request, response) => {
+  sendPage(response, "solo.html");
 });
 
 app.get("/api/health", async (_request, response) => {

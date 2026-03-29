@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Solo Challenges | Phathu and Ray's Pyte environment</title>
+  <meta
+    name="description"
+    content="Choose a randomized solo Python challenge, reveal hints, and move starter code into the practice editor."
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body data-page="solo">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark">Pyte</span>
+        <span class="brand-copy">Phathu and Ray's Pyte environment</span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="./index.html" data-nav-key="home">Home</a>
+        <a href="./practice.html" data-nav-key="practice">Practice</a>
+        <a href="./room.html" data-nav-key="room">Live Room</a>
+        <a href="./solo.html" data-nav-key="solo">Solo Challenges</a>
+      </nav>
+      <div class="toolbar">
+        <div class="theme-switch" aria-label="Theme switcher">
+          <button class="theme-button" type="button" data-theme-choice="beloved" aria-pressed="true">Beloved</button>
+          <button class="theme-button" type="button" data-theme-choice="angel" aria-pressed="false">Angel</button>
+        </div>
+        <div class="status-pill" id="pageStatus" data-state="ready">Ready</div>
+      </div>
+    </header>
+
+    <main class="page-stack">
+      <section class="hero hero-compact">
+        <div class="hero-copy">
+          <span class="eyebrow">Solo challenge library</span>
+          <h1>Pull a fresh prompt when you want a new idea</h1>
+          <p>
+            Choose a source, pick a difficulty, and send starter code straight into the practice page when you are ready to build.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <a class="button button-accent" href="./practice.html">Open Practice</a>
+          <a class="button button-warning" href="./room.html">Open Live Room</a>
+        </div>
+      </section>
+
+      <section class="page-grid solo-layout">
+        <article class="card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">Choose Your Challenge</h2>
+              <p class="card-copy">Mix sources and difficulty levels without crowding the rest of the app.</p>
+            </div>
+          </div>
+          <div class="card-body stack-tight">
+            <div class="field-grid two-column">
+              <div class="field">
+                <label for="challengeSource">Challenge Source</label>
+                <select id="challengeSource">
+                  <option value="pyteRace">Pyte race Original</option>
+                  <option value="days100">100 Days Style</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="challengeLevel">Difficulty</label>
+                <select id="challengeLevel">
+                  <option value="Amateur">Amateur</option>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                  <option value="Expert">Expert</option>
+                  <option value="God Level">God Level</option>
+                </select>
+              </div>
+            </div>
+            <div class="button-row">
+              <button class="button button-warning" id="newChallengeButton" type="button">New Challenge</button>
+              <button class="button button-accent" id="useStarterButton" type="button">Use Starter Code</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card challenge-card-large">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">Current Prompt</h2>
+              <p class="card-copy">Hints and solution ideas stay tucked away until you choose to open them.</p>
+            </div>
+          </div>
+          <div class="card-body stack-tight">
+            <div class="challenge-meta">
+              <span class="mini-pill" id="challengeSourcePill">Pyte race Original</span>
+              <span class="mini-pill" id="challengeLevelPill">Amateur</span>
+              <span class="mini-pill" id="challengeCountPill">2 in this pool</span>
+            </div>
+            <h3 class="room-panel-title" id="challengeTitle">Loading challenge...</h3>
+            <p class="challenge-text" id="challengeDescription"></p>
+            <div class="button-row">
+              <button class="button button-soft" id="toggleHintButton" type="button" aria-expanded="false">Reveal Hint</button>
+              <button class="button button-soft" id="toggleSolutionButton" type="button" aria-expanded="false">Reveal Solution Idea</button>
+            </div>
+            <div class="notice-card" id="challengeHint" hidden></div>
+            <div class="notice-card" id="challengeSolution" hidden></div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <noscript>
+    <div class="site-shell">
+      <div class="card">
+        <div class="card-body">
+          JavaScript is required for challenge randomization and starter code transfer.
+        </div>
+      </div>
+    </div>
+  </noscript>
+
+  <script src="./assets/app.js"></script>
+  <script src="./assets/solo-challenges.js"></script>
+  <script src="./assets/solo-page.js"></script>
+</body>
+</html>

@@ -6,7 +6,7 @@
   <title>Welcome to Phathu and Ray's Pyte environment</title>
   <meta
     name="description"
-    content="A clean dark-mode Python practice space for solo coding, shared live rooms, chat, and challenge rounds."
+    content="A cleaner multi-page Python practice app for solo coding, live rooms, and shared challenge rounds."
   >
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,266 +14,118 @@
     href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   >
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"
-  >
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css"
-  >
   <link rel="stylesheet" href="./assets/styles.css">
 </head>
-<body>
-  <div class="app-shell">
-    <header class="hero">
-      <div class="hero-copy">
-        <span class="brand-pill">Pyte</span>
-        <h1>Welcome to Phathu and Ray's Pyte environment</h1>
-        <p>
-          Practice Python on your own, then jump into a shared room to chat, solve challenges,
-          and code live together.
-        </p>
-      </div>
-      <div class="hero-status">
-        <span class="status-label">Session</span>
-        <div class="status-pill" id="appStatus" data-state="loading">Connecting...</div>
+<body data-page="home">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark">Pyte</span>
+        <span class="brand-copy">Phathu and Ray's Pyte environment</span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="./index.html" data-nav-key="home">Home</a>
+        <a href="./practice.html" data-nav-key="practice">Practice</a>
+        <a href="./room.html" data-nav-key="room">Live Room</a>
+        <a href="./solo.html" data-nav-key="solo">Solo Challenges</a>
+      </nav>
+      <div class="toolbar">
+        <div class="theme-switch" aria-label="Theme switcher">
+          <button class="theme-button" type="button" data-theme-choice="beloved" aria-pressed="true">Beloved</button>
+          <button class="theme-button" type="button" data-theme-choice="angel" aria-pressed="false">Angel</button>
+        </div>
+        <div class="status-pill" data-state="ready">Ready</div>
       </div>
     </header>
 
-    <main class="layout-grid">
-      <section class="main-column">
-        <article class="card practice-card">
+    <main class="page-stack">
+      <section class="hero hero-home">
+        <div class="hero-copy">
+          <span class="eyebrow">Practice together, without the clutter</span>
+          <h1>Welcome to Phathu and Ray's Pyte environment</h1>
+          <p>
+            Move between clean spaces for coding, live rooms, and challenge rounds without getting buried in one crowded screen.
+          </p>
+          <div class="button-row">
+            <a class="button button-accent" href="./practice.html">Open Practice</a>
+            <a class="button button-warning" href="./room.html">Open Live Room</a>
+            <a class="button button-soft" href="./solo.html">Browse Challenges</a>
+          </div>
+        </div>
+        <div class="hero-aside card">
           <div class="card-head">
             <div>
-              <h2 class="card-title">Python Practice Space</h2>
-              <p class="card-copy">
-                Write code, run it, and read the result in one place.
-              </p>
+              <h2 class="card-title">Choose Your Flow</h2>
+              <p class="card-copy">Keep the main screen calm and move straight to the part you need.</p>
             </div>
-          </div>
-          <div class="editor-shell">
-            <textarea id="codeEditor" aria-label="Python code editor"></textarea>
           </div>
           <div class="card-body stack-tight">
-            <div class="button-row wrap">
-              <button class="button button-run" id="runButton" type="button">Run Code</button>
-              <button class="button button-secondary" id="stopButton" type="button" disabled>Stop</button>
-              <button class="button button-soft" id="clearOutputButton" type="button">Clear Output</button>
-              <button class="button button-soft" id="resetCodeButton" type="button">Reset Example</button>
-              <button class="button button-accent" id="saveCodeButton" type="button">Save Locally</button>
-              <button class="button button-soft" id="loadCodeButton" type="button">Load Saved</button>
+            <div class="summary-line">
+              <strong>Practice</strong>
+              <span>Write Python, run it instantly, and read the real output.</span>
             </div>
-            <div class="practice-grid">
-              <div class="field">
-                <label for="programInput">Program Input</label>
-                <p class="field-copy">If your code uses <code>input()</code>, add one answer per line.</p>
-                <textarea
-                  id="programInput"
-                  class="input-box"
-                  spellcheck="false"
-                  autocorrect="off"
-                  autocapitalize="off"
-                  placeholder="Example:&#10;Ray&#10;72"
-                ></textarea>
-              </div>
-              <div class="field">
-                <label for="outputConsole">Output</label>
-                <p class="field-copy">The console shows the real result from your Python code.</p>
-                <pre id="outputConsole" class="console" aria-live="polite"></pre>
-              </div>
+            <div class="summary-line">
+              <strong>Live Room</strong>
+              <span>Join as Angel or Beloved, chat, and race through shared rounds.</span>
             </div>
+            <div class="summary-line">
+              <strong>Solo Challenges</strong>
+              <span>Pull a fresh prompt, reveal hints, and send starter code into practice.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="feature-grid">
+        <article class="card feature-card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">Python Practice</h2>
+              <p class="card-copy">A focused editor view with room to type, run, reset, save, and load your work.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <a class="inline-link" href="./practice.html">Go to the editor</a>
           </div>
         </article>
 
-        <article class="card">
+        <article class="card feature-card">
           <div class="card-head">
             <div>
-              <h2 class="card-title">Shared Challenge</h2>
-              <p class="card-copy">
-                Start the same prompt for both players and race to answer it live.
-              </p>
+              <h2 class="card-title">Shared Practice Room</h2>
+              <p class="card-copy">Preview the room, lock in Angel or Beloved, chat live, and keep score during the session.</p>
             </div>
-            <span class="mini-pill" id="challengePhasePill">Waiting</span>
           </div>
-          <div class="card-body stack-tight">
-            <div class="button-row">
-              <button class="button button-warning" id="startChallengeButton" type="button" disabled>Start Challenge</button>
+          <div class="card-body">
+            <a class="inline-link" href="./room.html">Go to the live room</a>
+          </div>
+        </article>
+
+        <article class="card feature-card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">Challenge Library</h2>
+              <p class="card-copy">Spin up randomized prompts by source and difficulty, then move straight into coding.</p>
             </div>
-            <div class="subpanel challenge-panel">
-              <div class="subpanel-title" id="roomChallengeTitle">No live challenge yet</div>
-              <div class="subtle-line" id="roomChallengeMeta">Join a room with both people connected to begin.</div>
-              <p class="challenge-text" id="roomChallengePrompt"></p>
-              <pre class="challenge-code" id="roomChallengeCode" hidden></pre>
-              <div class="choice-list" id="roomChallengeChoices"></div>
-              <div class="field">
-                <label for="challengeAnswerInput">Your Answer</label>
-                <textarea
-                  id="challengeAnswerInput"
-                  class="input-box short"
-                  placeholder="Type your answer here."
-                  spellcheck="false"
-                ></textarea>
-              </div>
-              <div class="button-row">
-                <button class="button button-accent" id="submitChallengeAnswerButton" type="button" disabled>Submit Answer</button>
-              </div>
-              <div class="notice-card" id="challengeResultSummary">Challenge results will appear here after the round ends.</div>
-            </div>
-            <div class="card-toggle-row">
-              <button class="toggle-chip" id="toggleRoundHistoryButton" type="button" aria-expanded="false">Show recent rounds</button>
-            </div>
-            <div class="subpanel" id="roundHistoryPanel" hidden>
-              <div class="subpanel-title">Recent Rounds</div>
-              <div class="round-history" id="roundHistoryList"></div>
-            </div>
+          </div>
+          <div class="card-body">
+            <a class="inline-link" href="./solo.html">Go to solo challenges</a>
           </div>
         </article>
       </section>
-
-      <aside class="side-column">
-        <article class="card">
-          <div class="card-head">
-            <div>
-              <h2 class="card-title">Practice Room</h2>
-              <p class="card-copy">
-                Pick a room code, choose your name, and connect when you are ready.
-              </p>
-            </div>
-            <span class="mini-pill" id="roomHeadline">Not in a room</span>
-          </div>
-          <div class="card-body stack-tight">
-            <div class="field">
-              <label for="roomCodeInput">Room Code</label>
-              <input id="roomCodeInput" class="text-input" maxlength="24" placeholder="Example: PYTE-RACE" autocomplete="off">
-            </div>
-            <div class="field">
-              <label>Choose Your Name</label>
-              <div class="identity-grid">
-                <label class="identity-option" id="identityOptionAngel">
-                  <input type="radio" name="identity" value="Angel" checked>
-                  <span>Angel</span>
-                </label>
-                <label class="identity-option" id="identityOptionBeloved">
-                  <input type="radio" name="identity" value="Beloved">
-                  <span>Beloved</span>
-                </label>
-              </div>
-            </div>
-            <div class="button-row">
-              <button class="button button-soft" id="checkRoomButton" type="button">Preview Room</button>
-              <button class="button button-accent" id="joinRoomButton" type="button">Join Room</button>
-              <button class="button button-secondary" id="leaveRoomButton" type="button" disabled>Leave</button>
-            </div>
-            <div class="notice-card" id="roomNotice">Enter a room code to see who is available.</div>
-            <div class="subpanel">
-              <div class="subpanel-title">Room Activity</div>
-              <div class="participant-list" id="participantList"></div>
-            </div>
-            <div class="subpanel" id="sessionScorePanel" hidden>
-              <div class="subpanel-title">Live Score</div>
-              <div class="score-grid">
-                <div class="score-box score-box-angel">
-                  <span class="score-name">Angel</span>
-                  <strong id="sessionAngelPoints">0</strong>
-                </div>
-                <div class="score-box score-box-beloved">
-                  <span class="score-name">Beloved</span>
-                  <strong id="sessionBelovedPoints">0</strong>
-                </div>
-              </div>
-              <div class="subtle-line" id="sessionRoundStatus">Scores appear once both players are active together.</div>
-            </div>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="card-head">
-            <div>
-              <h2 class="card-title">Live Chat</h2>
-              <p class="card-copy">
-                Send quick messages while you practice together.
-              </p>
-            </div>
-          </div>
-          <div class="card-body stack-tight">
-            <div class="chat-panel" id="chatMessages"></div>
-            <div class="chat-composer">
-              <textarea id="chatInput" class="input-box short" placeholder="Type a message..." spellcheck="false"></textarea>
-              <button class="button button-accent" id="sendChatButton" type="button" disabled>Send</button>
-            </div>
-          </div>
-        </article>
-
-        <article class="card muted-card">
-          <div class="card-head">
-            <div>
-              <h2 class="card-title">Solo Practice</h2>
-              <p class="card-copy">
-                Open extra prompts when you want something to work on alone.
-              </p>
-            </div>
-            <button class="toggle-chip" id="toggleSoloButton" type="button" aria-expanded="false">Open</button>
-          </div>
-          <div class="card-body stack-tight" id="soloPracticePanel" hidden>
-            <div class="field-grid two-column">
-              <div class="field">
-                <label for="challengeSource">Challenge Source</label>
-                <select id="challengeSource">
-                  <option value="pyteRace">Pyte race Original</option>
-                  <option value="days100">100 Days Style</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="challengeLevel">Difficulty</label>
-                <select id="challengeLevel">
-                  <option value="Amateur">Amateur</option>
-                  <option value="Beginner">Beginner</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Advanced">Advanced</option>
-                  <option value="Expert">Expert</option>
-                  <option value="God Level">God Level</option>
-                </select>
-              </div>
-            </div>
-            <div class="button-row">
-              <button class="button button-warning" id="newChallengeButton" type="button">New Challenge</button>
-              <button class="button button-accent" id="useStarterButton" type="button">Use Starter Code</button>
-            </div>
-            <div class="challenge-card">
-              <div class="challenge-meta">
-                <span class="mini-pill" id="challengeSourcePill">Pyte race Original</span>
-                <span class="mini-pill" id="challengeLevelPill">Amateur</span>
-                <span class="mini-pill" id="challengeCountPill">2 in this pool</span>
-              </div>
-              <h3 class="room-panel-title" id="challengeTitle">Loading challenge...</h3>
-              <p class="challenge-text" id="challengeDescription"></p>
-              <div class="button-row">
-                <button class="button button-soft" id="toggleHintButton" type="button">Reveal Hint</button>
-                <button class="button button-soft" id="toggleSolutionButton" type="button">Reveal Solution Idea</button>
-              </div>
-              <div class="notice-card" id="challengeHint" hidden></div>
-              <div class="notice-card" id="challengeSolution" hidden></div>
-            </div>
-          </div>
-        </article>
-      </aside>
     </main>
   </div>
 
   <noscript>
-    <div class="app-shell">
+    <div class="site-shell">
       <div class="card">
         <div class="card-body">
-          JavaScript is required for the in-browser Python runtime and the live room features.
+          JavaScript is required for the Python runner, live room, and theme switch.
         </div>
       </div>
     </div>
   </noscript>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
   <script src="./assets/app.js"></script>
 </body>
 </html>

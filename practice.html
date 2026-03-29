@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Practice | Phathu and Ray's Pyte environment</title>
+  <meta
+    name="description"
+    content="Practice Python in the browser with a clean editor, local save, input support, and a clear output console."
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"
+  >
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css"
+  >
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body data-page="practice">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark">Pyte</span>
+        <span class="brand-copy">Phathu and Ray's Pyte environment</span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="./index.html" data-nav-key="home">Home</a>
+        <a href="./practice.html" data-nav-key="practice">Practice</a>
+        <a href="./room.html" data-nav-key="room">Live Room</a>
+        <a href="./solo.html" data-nav-key="solo">Solo Challenges</a>
+      </nav>
+      <div class="toolbar">
+        <div class="theme-switch" aria-label="Theme switcher">
+          <button class="theme-button" type="button" data-theme-choice="beloved" aria-pressed="true">Beloved</button>
+          <button class="theme-button" type="button" data-theme-choice="angel" aria-pressed="false">Angel</button>
+        </div>
+        <div class="status-pill" id="pageStatus" data-state="loading">Connecting...</div>
+      </div>
+    </header>
+
+    <main class="page-stack">
+      <section class="hero hero-compact">
+        <div class="hero-copy">
+          <span class="eyebrow">Python practice</span>
+          <h1>Write code and see the real result</h1>
+          <p>
+            Keep one page focused on typing, running, and iterating. When you want a prompt, pull one from Solo Challenges and bring it back here.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <a class="button button-soft" href="./solo.html">Open Solo Challenges</a>
+          <a class="button button-warning" href="./room.html">Open Live Room</a>
+        </div>
+      </section>
+
+      <section class="page-grid practice-layout">
+        <article class="card editor-card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">Editor</h2>
+              <p class="card-copy">Type Python directly in the browser and keep your work saved on this device.</p>
+            </div>
+          </div>
+          <div class="editor-shell">
+            <textarea id="codeEditor" aria-label="Python code editor"></textarea>
+          </div>
+          <div class="card-body stack-tight">
+            <div class="button-row">
+              <button class="button button-run" id="runButton" type="button">Run Code</button>
+              <button class="button button-secondary" id="stopButton" type="button" disabled>Stop</button>
+              <button class="button button-soft" id="clearOutputButton" type="button">Clear Output</button>
+              <button class="button button-soft" id="resetCodeButton" type="button">Reset Example</button>
+              <button class="button button-accent" id="saveCodeButton" type="button">Save Locally</button>
+              <button class="button button-soft" id="loadCodeButton" type="button">Load Saved</button>
+            </div>
+          </div>
+        </article>
+
+        <div class="stack-tight">
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Program Input</h2>
+                <p class="card-copy">If your code uses <code>input()</code>, add one answer per line.</p>
+              </div>
+            </div>
+            <div class="card-body">
+              <textarea
+                id="programInput"
+                class="input-box input-box-tall"
+                spellcheck="false"
+                autocorrect="off"
+                autocapitalize="off"
+                placeholder="Example:&#10;Ray&#10;72"
+              ></textarea>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Output</h2>
+                <p class="card-copy">The console only shows what your Python program prints or raises.</p>
+              </div>
+            </div>
+            <div class="card-body">
+              <pre id="outputConsole" class="console" aria-live="polite"></pre>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <noscript>
+    <div class="site-shell">
+      <div class="card">
+        <div class="card-body">
+          JavaScript is required for the in-browser Python runner.
+        </div>
+      </div>
+    </div>
+  </noscript>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+  <script src="./assets/app.js"></script>
+  <script src="./assets/practice-page.js"></script>
+</body>
+</html>

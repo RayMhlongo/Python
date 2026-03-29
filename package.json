@@ -7,10 +7,10 @@
   "scripts": {
     "dev": "node server/index.js",
     "start": "node server/index.js",
-    "check": "node --check server/index.js"
+    "check": "node --check server/index.js && node --check server/room-manager.js && node --check server/room-challenges.js && node --check assets/app.js && node --check assets/practice-page.js && node --check assets/solo-page.js && node --check assets/room-page.js"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
