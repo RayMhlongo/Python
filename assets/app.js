@@ -482,16 +482,6 @@ function refreshAppStatus() {
     return;
   }
 
-  if (!state.socketConnected && !state.runtimeReady) {
-    setStatus(refs.appStatus, "Connecting...", "loading");
-    return;
-  }
-
-  if (!state.socketConnected) {
-    setStatus(refs.appStatus, "Offline", "warning");
-    return;
-  }
-
   if (!state.runtimeReady) {
     setStatus(refs.appStatus, "Connecting...", "loading");
     return;
@@ -1379,6 +1369,14 @@ async function submitRoomChallengeAnswer() {
 }
 
 function bootSocket() {
+  if (typeof window.io !== "function") {
+    state.socket = null;
+    state.socketConnected = false;
+    refs.roomNotice.textContent = "Live room features are unavailable right now, but solo coding still works.";
+    refreshAppStatus();
+    return;
+  }
+
   state.socket = window.io({
     transports: ["websocket", "polling"],
     reconnection: true
@@ -1400,6 +1398,11 @@ function bootSocket() {
   });
 
   state.socket.on("disconnect", () => {
+    state.socketConnected = false;
+    refreshAppStatus();
+  });
+
+  state.socket.on("connect_error", () => {
     state.socketConnected = false;
     refreshAppStatus();
   });
